@@ -5,8 +5,8 @@ from utils import BertTrainer
 
 if __name__ == '__main__':
     # Constants
-    # FILE_NAME = 'data/merged_headlines_annos.compact.tsv'
-    FILE_NAME = 'data/full-isw-release.tsv'
+    FILE_NAME = 'data/merged_headlines_annos.compact.tsv'
+    # FILE_NAME = 'data/full-isw-release.tsv'
     BERT_MODEL = "bert-base-german-cased"
     MAX_LEN = 75
     BATCH_SIZE = 32
@@ -17,12 +17,13 @@ if __name__ == '__main__':
     MAX_GRAD_NORM = 1.0
     LR = 3e-5
 
-    # Load preprocessed sentences, labels and tag2idx
-    # Create dicts for mapping from labels to IDs and back
-
-    pre = IswPreprocessor(filename=FILE_NAME)
-    sentences = pre.get_list_of_sentences()
-    labels = pre.get_list_of_nerlabels()
+    # Base on the FILE_NAME to load preprocessed sentences, labels and tag2idx
+    if "isw" in str(FILE_NAME):
+        pre = IswPreprocessor(filename=FILE_NAME)
+    elif "headlines" in str(FILE_NAME):
+        pre = TweetPreprocessor(filename=FILE_NAME)
+    
+    sentences, labels = pre.get_list_of_sentences_labels()
     tag2idx, idx2tag = pre.get_tag2idx_idx2tag()
 
 
