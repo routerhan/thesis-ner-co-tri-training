@@ -2,6 +2,7 @@ import os
 import torch
 import numpy as np
 import pandas as pd
+import datetime as dt
 from torch.optim import Adam
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
 from keras.preprocessing.sequence import pad_sequences
@@ -119,7 +120,15 @@ class BertTrainer:
         print("Loaded training and validation data into DataLoaders.")
         return train_dataloader, valid_dataloader
 
-    def train_and_save_model(self, epochs=4, max_grad_norm=1.0, learning_rate=3e-5):
+    def train_and_save_model(self, save_epochs=False, epochs=4, max_grad_norm=1.0, learning_rate=3e-5):
+        
+        if save_epochs:
+            # Create directory for storing our model checkpoints
+            if not os.path.exists("models"):
+                os.mkdir("models")
+            THIS_RUN = dt.datetime.now().strftime("%m.%d, %H.%M.%S")
+            os.mkdir(f"models/{THIS_RUN}")
+
         model = self.model
         # Set hyperparameters (optimizer, weight decay, learning rate)
         optimizer_grouped_parameters = get_hyperparameters(model, self.FULL_FINETUNING)
@@ -225,3 +234,22 @@ class BertTrainer:
             print("Classification Report:\n {}".format(cl_report))
             print("Confusion Matrix:\n {}".format(conf_mat))
             print("F1-Score: {}".format(flat_accuracy(pred_tags, valid_tags)))
+
+            if save_epochs:
+                # Save model and optimizer state_dict following every epoch
+                save_path = f"models/{THIS_RUN}/train_checkpoint_epoch_{epoch}.tar"
+                torch.save(
+                    {
+                        "epoch": epoch,
+                        "model_state_dict": model.state_dict(),
+                        "optimizer_state_dict": optimizer.state_dict(),
+                        "train_loss": tr_loss,
+                        "train_acc": tr_accuracy,
+                        "eval_loss": eval_loss,
+                        "eval_acc": eval_accuracy,
+                        "classification_report": cl_report,
+                        "confusion_matrix": conf_mat,
+                    },
+                    save_path,
+                )
+                print(f"Checkpoint saved to {save_path}.")

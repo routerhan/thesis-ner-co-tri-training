@@ -5,8 +5,8 @@ from utils import BertTrainer
 
 if __name__ == '__main__':
     # Constants
-    FILE_NAME = 'data/merged_headlines_annos.compact.tsv'
-    # FILE_NAME = 'data/full-isw-release.tsv'
+    # FILE_NAME = 'data/merged_headlines_annos.compact.tsv'
+    FILE_NAME = 'data/full-isw-release.tsv'
     BERT_MODEL = "bert-base-german-cased"
     MAX_LEN = 75
     BATCH_SIZE = 32
@@ -45,7 +45,7 @@ if __name__ == '__main__':
                                 tag2idx=tag2idx, 
                                 idx2tag=idx2tag)
     # Start training
-    bert_trainer.train_and_save_model(epochs=EPOCHS, max_grad_norm=MAX_GRAD_NORM, learning_rate=LR)
+    bert_trainer.train_and_save_model(save_epochs=False, epochs=EPOCHS, max_grad_norm=MAX_GRAD_NORM, learning_rate=LR)
 
 
 
