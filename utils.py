@@ -3,6 +3,7 @@ import torch
 import numpy as np
 import pandas as pd
 import datetime as dt
+import json
 from torch.optim import Adam
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
 from keras.preprocessing.sequence import pad_sequences
@@ -65,6 +66,63 @@ def annot_confusion_matrix(valid_tags, pred_tags):
 
     return content
 
+class Ner:
+    def __init__(self,model_dir: str):
+        self.model , self.tokenizer, self.model_config = self.load_model(model_dir)
+        self.label_map = self.model_config["label_map"]
+        self.max_seq_length = self.model_config["max_seq_length"]
+        self.label_map = {int(k):v for k,v in self.label_map.items()}
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.model = self.model.to(self.device)
+        self.model.eval()
+
+    def load_model(self, model_dir: str, model_config: str = "model_config.json"):
+        model_config = os.path.join(model_dir,model_config)
+        model_config = json.load(open(model_config))
+        model = BertForTokenClassification.from_pretrained(model_dir)
+        tokenizer = BertTokenizer.from_pretrained(model_dir)
+        return model, tokenizer, model_config
+
+    def tokenize(self, sentences: list):
+        """ tokenize input: list of sentences"""
+        tokenized_texts = [self.tokenizer.tokenize(sent) for sent in sentences]
+        return tokenized_texts
+
+    def preprocess(self, sentences: list):
+        """ preprocess """
+        tokenized_texts = self.tokenize(sentences)
+        input_ids = pad_sequences([self.tokenizer.convert_tokens_to_ids(txt) for txt in tokenized_texts],
+                                        maxlen=self.max_seq_length, dtype="long", truncating="post", padding="post")
+        attention_masks = [[float(i>0) for i in ii] for ii in input_ids]
+        return input_ids, attention_masks
+
+    def predict(self, sentences: list):
+        input_ids, attention_masks = self.preprocess(sentences)
+        input_ids = torch.tensor(input_ids)
+        attention_masks = torch.tensor(attention_masks)
+        predictions = []
+        with torch.no_grad():
+            logits = self.model(input_ids, attention_masks=attention_masks)
+        logits = logits.detach().cpu().numpy()
+        predictions.extend([list(p) for p in np.argmax(logits, axis=2)])
+        logits_confidence = [values[label].item() for values,label in zip(logits[0],predictions)]
+
+        logits = []
+        pos = 0
+        for index,mask in enumerate(valid_ids[0]):
+            if index == 0:
+                continue
+            if mask == 1:
+                logits.append((logits_label[index-pos],logits_confidence[index-pos]))
+            else:
+                pos += 1
+        logits.pop()
+
+        labels = [(self.label_map[label],confidence) for label,confidence in logits]
+        words = word_tokenize(text)
+        assert len(labels) == len(words)
+        output = [{"word":word,"tag":label,"confidence":confidence} for word,(label,confidence) in zip(words,labels)]
+        return output
 
 class BertTrainer:
     def __init__(self, bert_model, max_len, batch_size, full_finetuning, sentences, labels, tag2idx, idx2tag):
@@ -88,7 +146,7 @@ class BertTrainer:
                                         maxlen=max_len, dtype="long", truncating="post", padding="post")
         # Get tags of labels with id
         self.tags = pad_sequences([[tag2idx.get(l) for l in lab] for lab in labels],
-                                        maxlen=max_len, value=tag2idx["O"], padding="post",
+                                        maxlen=max_len, padding="post",
                                         dtype="long", truncating="post")
 
         # Get attention mask from BERT label
