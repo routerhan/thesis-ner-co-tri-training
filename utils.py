@@ -8,7 +8,8 @@ from torch.optim import Adam
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
 from keras.preprocessing.sequence import pad_sequences
 from sklearn.model_selection import train_test_split
-
+import nltk
+from nltk import word_tokenize
 from seqeval.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 from tqdm import tqdm, trange
@@ -83,41 +84,59 @@ class Ner:
         tokenizer = BertTokenizer.from_pretrained(model_dir)
         return model, tokenizer, model_config
 
-    def tokenize(self, sentences: list):
-        """ tokenize input: list of sentences"""
-        tokenized_texts = [self.tokenizer.tokenize(sent) for sent in sentences]
-        return tokenized_texts
+    def tokenize(self, text: str):
+        """ tokenize input"""
+        words = word_tokenize(text)
+        tokens = []
+        valid_positions = []
+        for i,word in enumerate(words):
+            token = self.tokenizer.tokenize(word)
+            token = [ t for t in token if "##" not in t ]
+            tokens.extend(token)
+            for i in range(len(token)):
+                if i == 0:
+                    valid_positions.append(1)
+                else:
+                    valid_positions.append(0)
+        return tokens, valid_positions
 
-    def preprocess(self, sentences: list):
+    def preprocess(self, text: str):
         """ preprocess """
-        tokenized_texts = self.tokenize(sentences)
-        input_ids = pad_sequences([self.tokenizer.convert_tokens_to_ids(txt) for txt in tokenized_texts],
-                                        maxlen=self.max_seq_length, dtype="long", truncating="post", padding="post")
-        attention_masks = [[float(i>0) for i in ii] for ii in input_ids]
-        return input_ids, attention_masks
+        tokens, valid_positions = self.tokenize(text)
+        segment_ids = []
+        for i in range(len(tokens)):
+            segment_ids.append(0)
+        input_ids = self.tokenizer.convert_tokens_to_ids(tokens)
+        input_mask = [1] * len(input_ids)
+        while len(input_ids) < self.max_seq_length:
+            input_ids.append(0)
+            input_mask.append(0)
+            segment_ids.append(0)
+            valid_positions.append(0)
+        return input_ids,input_mask,segment_ids,valid_positions
 
-    def predict(self, sentences: list):
-        input_ids, attention_masks = self.preprocess(sentences)
-        input_ids = torch.tensor(input_ids)
-        attention_masks = torch.tensor(attention_masks)
-        predictions = []
+    def predict(self, text: str):
+        input_ids,input_mask,segment_ids,valid_ids = self.preprocess(text)
+        input_ids = torch.tensor([input_ids],dtype=torch.long,device=self.device)
+        input_mask = torch.tensor([input_mask],dtype=torch.long,device=self.device)
+        segment_ids = torch.tensor([segment_ids],dtype=torch.long,device=self.device)
+        valid_ids = torch.tensor([valid_ids],dtype=torch.long,device=self.device)
+
         with torch.no_grad():
-            logits = self.model(input_ids, attention_masks=attention_masks)
-        logits = logits.detach().cpu().numpy()
-        predictions.extend([list(p) for p in np.argmax(logits, axis=2)])
-        logits_confidence = [values[label].item() for values,label in zip(logits[0],predictions)]
+            outputs = self.model(input_ids, segment_ids, input_mask,valid_ids)
+            logits = outputs[0]
+
+        logits = F.softmax(logits,dim=2)
+        logits_label = torch.argmax(logits,dim=2)
+        logits_label = logits_label.detach().cpu().numpy().tolist()[0]
+        logits_confidence = [values[label].item() for values,label in zip(logits[0],logits_label)]
 
         logits = []
-        pos = 0
         for index,mask in enumerate(valid_ids[0]):
-            if index == 0:
-                continue
             if mask == 1:
-                logits.append((logits_label[index-pos],logits_confidence[index-pos]))
+                logits.append((logits_label[index], logits_confidence[index]))
             else:
-                pos += 1
-        logits.pop()
-
+                pass
         labels = [(self.label_map[label],confidence) for label,confidence in logits]
         words = word_tokenize(text)
         assert len(labels) == len(words)

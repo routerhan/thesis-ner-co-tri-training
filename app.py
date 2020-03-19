@@ -48,7 +48,7 @@ def main():
                         help="Where do you want to store the pre-trained models downloaded from s3")
 
     parser.add_argument("--max_seq_length",
-                        default=None,
+                        default=512,
                         type=int,
                         help="The maximum total input sequence length after WordPiece tokenization. \n"
                              "Sequences longer than this will be truncated, and sequences shorter \n"
@@ -124,8 +124,8 @@ def main():
                         tag2idx=tag2idx, 
                         idx2tag=idx2tag)
 
-    train_dataloader, eval_dataloader = bert_trainer.get_train_and_vaild_dataloader()
     if args.do_train:
+        train_dataloader, _ = bert_trainer.get_train_and_vaild_dataloader()
         # Prepare initial tokenizer and model 
         model = bert_trainer.model
         tokenizer = bert_trainer.tokenizer
@@ -171,7 +171,20 @@ def main():
         tokenizer.save_pretrained(args.output_dir)
         label_map = idx2tag
         # label_map = {key:val for key, val in label_map.items() if val != "O"}
-        model_config = {"bert_model":args.bert_model,"max_seq_length":args.max_seq_length,"num_labels":len(label_map),"label_map":label_map}
+        model_config = {
+            "bert_model":args.bert_model,
+            "train_data_dir":args.data_dir,
+            "train_batch_size":args.train_batch_size,
+            "num_train_epochs":args.num_train_epochs,
+            "learning_rate":args.learning_rate,
+            "adam_epsilon":args.adam_epsilon,
+            "max_grad_norm":args.max_grad_norm,
+            "max_seq_length":args.max_seq_length,
+            "output_dir":args.output_dir,
+            "seed":args.seed,
+            "gradient_accumulation_steps":args.gradient_accumulation_steps,
+            "num_labels":len(label_map),"label_map":label_map
+            }
         json.dump(model_config,open(os.path.join(args.output_dir,"model_config.json"),"w"))
 
     # else load the saved model for evaluation / prediction
@@ -182,6 +195,7 @@ def main():
     model.to(bert_trainer.device)
 
     if args.do_eval:
+        _, eval_dataloader = bert_trainer.get_train_and_vaild_dataloader()
         if args.eval_on == "valid":
             pass
         elif args.eval_on == "test":

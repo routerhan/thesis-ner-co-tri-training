@@ -42,7 +42,7 @@ class IswPreprocessor:
         self.ners_vals = list(map(lambda x: x if x != 'NONE' else 'O', set(flat_labels)))
         
         print("number of sentences:", len(sentences))
-        print('num of tags :', len(ners_vals))
+        print('num of tags :', len(self.ners_vals))
 
         return sentences, labels
 
