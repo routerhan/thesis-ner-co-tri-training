@@ -1,8 +1,6 @@
 import os
 import torch
 import numpy as np
-import pandas as pd
-import datetime as dt
 import argparse
 import json 
 from torch.optim import Adam
@@ -11,14 +9,12 @@ from keras.preprocessing.sequence import pad_sequences
 from sklearn.model_selection import train_test_split
 import torch.nn.functional as F
 
-
 from seqeval.metrics import classification_report
-from sklearn.metrics import confusion_matrix
 from tqdm import tqdm, trange
 
 from utils import BertTrainer, get_hyperparameters
 
-from preprocessor.preprocessor import *
+from preprocessor import IswPreprocessor, TweetPreprocessor
 from transformers import BertTokenizer, BertForTokenClassification
 
 
@@ -112,7 +108,7 @@ def main():
         pre = IswPreprocessor(filename=args.data_dir)
     elif "headlines" in str(args.data_dir):
         pre = TweetPreprocessor(filename=args.data_dir)
-    sentences, labels = pre.get_list_of_sentences_labels()
+    sentences, labels = pre.get_sentences_and_labels()
     tag2idx, idx2tag = pre.get_tag2idx_idx2tag()
 
     bert_trainer = BertTrainer(bert_model=args.bert_model, 
@@ -134,7 +130,6 @@ def main():
         # Set hyperparameters (optimizer, weight decay, learning rate)
         optimizer_grouped_parameters = get_hyperparameters(model, ff=True)
         optimizer = Adam(optimizer_grouped_parameters, lr=args.learning_rate)
-        print("Initialized optimizer and set hyperparameters.")
         
         model.train()
         for _ in trange(int(args.num_train_epochs), desc="Epoch"):
