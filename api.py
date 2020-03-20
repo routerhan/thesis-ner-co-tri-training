@@ -1,18 +1,38 @@
 from flask import Flask,request,jsonify
 from flask_cors import CORS
 import json
+import os
+import logging
+
 from predict import Ner
 
 app = Flask(__name__)
 CORS(app)
 
+log_dir = "./logs"
 model_dir = "./models"
 model = Ner(model_dir)
+
+
+def setup():
+    logs_dir = log_dir
+    models_dir = model_dir
+
+    if not os.path.exists(logs_dir):
+        app.logger.info('Dir {} doesnot exist, creating it ...'.format(logs_dir))
+        os.makedirs(logs_dir)
+
+    if not os.path.exists(models_dir):
+        app.logger.info('Dir ${} doesnot exist, creating it ...'.format(models_dir))
+        os.makedirs(models_dir)
+
+    logging.basicConfig(filename='{}/ner.log'.format(logs_dir), level=logging.INFO, filemode='w', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 @app.route("/predict",methods=['POST'])
 def predict():
     request_data = request.get_json()
     text = request_data['sentence']
+    app.logger.info('Receive sentence for predicting')
     try:
         out = model.predict(text)
         return jsonify({"result":out})
@@ -23,7 +43,9 @@ def predict():
 @app.route("/info",methods=['GET'])
 def info():
     model_config = json.load(open("./models/model_config.json"))
+    app.logger.info('Load model config')
     return jsonify({"config:" : model_config})
 
 if __name__ == "__main__":
+    setup()
     app.run('0.0.0.0',port=8080)

@@ -1,17 +1,15 @@
-import pandas as pd
+from flask import Flask
+
+app = Flask(__name__)
 
 
 class IswPreprocessor:
-    def __init__(self, filename):
-        print(' ------ Preprocssing ISW German corpus ------')
-        self.file = self.load_isw_tsv_file(filename)
+    def __init__(self, filename='data/test-full-isw-release.tsv'):
+        app.logger.info('------ Preprocssing ISW German corpus ------')
+        self.file = open(filename, encoding='utf-8')
         self.ners_vals=[]
 
-    def load_isw_tsv_file(self, filename='data/test-full-isw-release.tsv'):
-        file = open(filename, encoding='utf-8')
-        return file
-
-    def get_list_of_sentences_labels(self):
+    def get_sentences_and_labels(self):
         """
         return : list of sentences : ['I have apple', 'I am here', 'hello ']
         return : list of labels : ['O', 'O', 'B-GPE', ...]
@@ -41,8 +39,8 @@ class IswPreprocessor:
         labels = [list(map(lambda x: x if x != 'NONE' else 'O', i)) for i in labels]
         self.ners_vals = list(map(lambda x: x if x != 'NONE' else 'O', set(flat_labels)))
         
-        print("number of sentences:", len(sentences))
-        print('num of tags :', len(self.ners_vals))
+        app.logger.info("Number of sentences: {0} ".format(len(sentences)))
+        app.logger.info("Number of tags: {0} ".format(len(self.ners_vals)))
 
         return sentences, labels
 
@@ -58,11 +56,11 @@ class IswPreprocessor:
 
 class TweetPreprocessor:
     def __init__(self, filename='data/merged_headlines_annos.compact.tsv'):
-        print(' ------ Preprocssing Tweets corpus ------')
+        app.logger.info('------ Preprocssing Tweets corpus ------')
         self.file = open(filename, encoding='utf-8')
         self.ners_vals=[]
 
-    def get_list_of_sentences_labels(self):
+    def get_sentences_and_labels(self):
         """
         return : list of sentences : ['I have apple', 'I am here', 'hello ']
         return : list of labels : ['O', 'O', 'B-GPE', ...]
@@ -90,8 +88,9 @@ class TweetPreprocessor:
             
         labels = [list(map(lambda x: x if x != 'NONE' else 'O', i)) for i in labels]
         self.ners_vals = list(map(lambda x: x if x != 'NONE' else 'O', set(flat_labels)))
-        print("Total number of tweets", len(sentences))
-        print("Total number of ner tags in tweets", len(self.ners_vals))
+
+        app.logger.info("Number of sentences: {0} ".format(len(sentences)))
+        app.logger.info("Number of tags: {0} ".format(len(self.ners_vals)))
 
         return sentences, labels
 

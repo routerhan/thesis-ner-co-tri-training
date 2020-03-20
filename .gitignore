@@ -141,6 +141,7 @@ celerybeat-schedule
 # mkdocs documentation
 /site
 /models/*
+/logs/*
 
 # mypy
 .mypy_cache/
