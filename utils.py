@@ -13,11 +13,46 @@ from nltk import word_tokenize
 from seqeval.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 from tqdm import tqdm, trange
+from collections import Counter
 
 
 from preprocessor import IswPreprocessor, TweetPreprocessor
 from transformers import BertTokenizer, BertForTokenClassification
 
+
+def cosine_similarity(pred_resultA:list, pred_resultB:list):
+    """
+    pred_result = [  {'confidence': 0.2621215581893921, 'tag': 'O', 'word': 'ich'},
+                {'confidence': 0.0977315902709961, 'tag': 'I-SORD', 'word': 'aus'},
+                {'confidence': 0.1431599259376526, 'tag': 'O', 'word': 'EU'}  ]
+    return: cosine similarity score for identical check
+    """
+    A_tag_list = [dic['tag'] for dic in pred_resultA]
+    B_tag_list = [dic['tag'] for dic in pred_resultB]
+    
+    a_vals = Counter(A_tag_list)
+    b_vals = Counter(B_tag_list)
+    # convert to word-vectors
+    words  = list(a_vals.keys() | b_vals.keys())
+    a_vect = [a_vals.get(word, 0) for word in words]
+    b_vect = [b_vals.get(word, 0) for word in words]
+    # find cosine
+    len_a  = sum(av*av for av in a_vect) ** 0.5
+    len_b  = sum(bv*bv for bv in b_vect) ** 0.5
+    dot    = sum(av*bv for av,bv in zip(a_vect, b_vect))
+    cosine = dot / (len_a * len_b)
+    return round(cosine,4)
+
+def get_avg_confident_score(pred_result:list):
+    """
+    pred_result = [  {'confidence': 0.2621215581893921, 'tag': 'O', 'word': 'ich'},
+                {'confidence': 0.0977315902709961, 'tag': 'I-SORD', 'word': 'aus'},
+                {'confidence': 0.1431599259376526, 'tag': 'O', 'word': 'EU'}  ]
+    return: avg score of every confidence score in result
+    """
+    scores = [dic['confidence'] for dic in pred_result]
+    avg_score = sum(scores)/len(scores)
+    return round(avg_score, 4)
 
 def get_hyperparameters(model, ff):
 
@@ -79,11 +114,12 @@ class BertTrainer:
         # Initialize PRETRAINED TOKENIZER
         self.tokenizer = BertTokenizer.from_pretrained(bert_model, do_lower_case=False)
         # Initialize PRETRAINED MODEL
-        self.model = BertForTokenClassification.from_pretrained(bert_model, num_labels=len(tag2idx))
+        self.model = BertForTokenClassification.from_pretrained(bert_model, num_labels=len(tag2idx)+1)
         self.model.to(self.device)
 
         # Tokenize the sentences
-        self.tokenized_texts = [self.tokenizer.tokenize(sent) for sent in sentences]
+        self.tokenized_texts = [[ t for t in self.tokenizer.tokenize(sent) if "##" not in t ] for sent in sentences]
+
         # Get input id of token
         self.input_ids = pad_sequences([self.tokenizer.convert_tokens_to_ids(txt) for txt in self.tokenized_texts],
                                         maxlen=max_len, dtype="long", truncating="post", padding="post")
@@ -103,6 +139,8 @@ class BertTrainer:
                                                                 random_state=42, test_size=0.1)
 
         # Convert dataset to torch tensors
+        print('val input',val_inputs)
+        print('val mask',val_masks)
         tr_inputs = torch.tensor(tr_inputs)
         val_inputs = torch.tensor(val_inputs)
         tr_tags = torch.tensor(tr_tags)

@@ -1,5 +1,11 @@
 idx	fileid	tokenid	token	norm	lemma	ontoNer
 0	ISW-_E_00001_SE_01_T_02_DF_01	# /home/ruppenhofer/repos/agd/sample_files/isw/iso-transcripts/ISW-_E_00001_SE_01_T_02_DF_01.xml.annotated.xml	NONE	NONE	NONE	NONE
+1051	ISW-_E_00001_SE_01_T_03_DF_01	w765	nach	nach	nach	NONE
+1052	ISW-_E_00001_SE_01_T_03_DF_01	w766	Palästina	Palästina	Palästina	B-GPE
+1053	ISW-_E_00001_SE_01_T_03_DF_01	w767	nachher	nachher	nachher	B-TIME
+1054	ISW-_E_00001_SE_01_T_03_DF_01	w768	zu	zu	zu	NONE
+1055	ISW-_E_00001_SE_01_T_03_DF_01	w769	kommen	kommen	kommen	NONE
+1056	ISW-_E_00001_SE_01_T_03_DF_01	.	NONE	NONE	NONE	NONE
 1	ISW-_E_00001_SE_01_T_02_DF_01	NONE	NONE	NONE	NONE	NONE
 2	ISW-_E_00001_SE_01_T_02_DF_01	REST	NONE	NONE	NONE	NONE
 3	ISW-_E_00001_SE_01_T_02_DF_01	((00:00:00))	NONE	NONE	NONE	NONE
