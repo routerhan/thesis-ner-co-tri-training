@@ -227,7 +227,6 @@ def main():
         torch.distributed.barrier()  # Make sure only the first process in distributed training will download model & vocab
 
     model.to(device)
-
     param_optimizer = list(model.named_parameters())
     no_decay = ['bias','LayerNorm.weight']
     optimizer_grouped_parameters = [
