@@ -2,7 +2,7 @@ import os
 import torch
 import json
 from nltk import word_tokenize
-from transformers import BertTokenizer, BertForTokenClassification
+from pytorch_transformers import BertTokenizer, BertForTokenClassification
 import torch.nn.functional as F
 
 class BertNer(BertForTokenClassification):
