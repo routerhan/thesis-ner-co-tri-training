@@ -142,6 +142,10 @@ celerybeat-schedule
 /site
 /models/*
 /logs/*
+/isw_model/*
+/tw_model/*
+/onto_model/*
+/model_2/*
 
 # mypy
 .mypy_cache/
