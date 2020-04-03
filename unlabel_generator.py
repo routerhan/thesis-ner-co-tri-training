@@ -53,7 +53,7 @@ def main():
     all_sentences = get_sentences(xml_list)
     logger.info("Year: {}, Num of sentences: {}".format(args.year_data_dir, len(all_sentences)))
     # Save to sentences
-    joblib.dump(all_sentences,'unlabel_sentences/{}_sentences.pkl'.format(directory))
+    joblib.dump(all_sentences,'unlabel_sentences/{}_sentences.pkl'.format(args.year_data_dir))
     logger.info("Save unlabel sentences as pickle file: unlabel_sentences/{}".format(args.year_data_dir))
 
 
