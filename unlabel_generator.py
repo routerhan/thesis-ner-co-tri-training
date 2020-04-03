@@ -1,5 +1,5 @@
 import os
-import pickle
+import joblib
 import xml.etree.ElementTree as ET
 import argparse
 import logging
@@ -52,9 +52,8 @@ def main():
     xml_list = list_files(directory)
     all_sentences = get_sentences(xml_list)
     logger.info("Year: {}, Num of sentences: {}".format(args.year_data_dir, len(all_sentences)))
-    f = open('unlabel_sentences/{}_sentences'.format(args.year_data_dir), 'wb')
-    pickle.dump(all_sentences, f)
-    f.close()
+    # Save to sentences
+    joblib.dump(all_sentences,'unlabel_sentences/{}_sentences.pkl'.format(directory))
     logger.info("Save unlabel sentences as pickle file: unlabel_sentences/{}".format(args.year_data_dir))
 
 
