@@ -118,9 +118,56 @@ def convert_examples_to_features(all_sentences, all_labels, label_list, max_seq_
     return features
 
 
+class OntoPreprocessor:
+    def __init__(self, filename='data/onto.train.ner.sample'):
+        logger.info('------ Preprocssing OntoNote English corpus ------')
+        self.file = open(filename, encoding='utf-8')
+        self.sentences, self.labels, self.flat_labels = self.get_sentences_and_labels()
+
+        logger.info("Number of sentences: {0} ".format(len(self.sentences)))
+        logger.info("Number of tags: {0} ".format(len(self.get_labels())))
+    
+    def get_labels(self):
+        label_list = list(sorted(set(self.flat_labels)))
+        label_list.append("[CLS]")
+        label_list.append("[SEP]")
+        return label_list
+
+    def get_sentences_and_labels(self):
+        """
+        return : list of sentences : ['I have apple', 'I am here', 'hello ']
+        return : list of labels : ['O', 'O', 'B-GPE', ...]
+        """
+        labels, label, sentences, sentence, flat_labels = [], [], [], [], []
+        for line in self.file:
+            line = line.strip()
+            splits = line.split("\t")
+            # if splits[1].startswith('-') or splits[1].startswith(',') or splits[1].startswith('.') or splits[1].startswith(':'):
+            #     continue
+            if len(line)==0 or line.startswith('-DOCSTART') or line[0]=="\n" :
+                if len(label)>0 and len(sentence)>0:
+                    sentences.append(" ".join(sentence))
+                    labels.append(label)
+                    assert len(sentences) == len(labels)
+                    sentence = []
+                    label = []
+                continue
+            # if splits[1].startswith('-') or splits[1].startswith(',') or splits[1].startswith('.') or splits[1].startswith(':'):
+            #     continue
+            # else:
+            sentence.append(splits[0])
+            label.append(splits[3])
+            flat_labels.append(splits[3])
+
+        if len(label)>0 and len(sentence)>0:
+            sentences.append(" ".join(sentence))
+            labels.append(label)
+            
+
+        return sentences, labels, flat_labels
 
 class IswPreprocessor:
-    def __init__(self, filename='data/test-full-isw-release.tsv'):
+    def __init__(self, filename='data/train-full-isw-release.tsv'):
         logger.info('------ Preprocssing ISW German corpus ------')
         self.file = open(filename, encoding='utf-8')
         self.sentences, self.labels, self.flat_labels = self.get_sentences_and_labels()
@@ -223,4 +270,14 @@ class TweetPreprocessor:
         tag2idx = {t: i for i, t in enumerate(sorted(self.ners_vals), 1)}
         idx2tag = {i: t for t, i in tag2idx.items()}
         return tag2idx, idx2tag
+# filename='data/onto.train.ner.sample'
+# pre = OntoPreprocessor()
+# print('sen', pre.sentences)
+# print('label', pre.labels)
+# print('lab_list', pre.get_labels())
+# # print('data', pre.readfile(filename))
 
+# pre2 = IswPreprocessor()
+# print('sen', pre2.sentences[:2])
+# print('label', pre2.labels[:2])
+# print('lab_list', pre2.get_labels())
