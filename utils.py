@@ -8,8 +8,6 @@ from torch.optim import Adam
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
 from keras.preprocessing.sequence import pad_sequences
 from sklearn.model_selection import train_test_split
-import nltk
-from nltk import word_tokenize
 from seqeval.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 from tqdm import tqdm, trange
