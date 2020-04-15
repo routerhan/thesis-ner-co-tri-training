@@ -167,7 +167,7 @@ class OntoPreprocessor:
         return sentences, labels, flat_labels
 
 class IswPreprocessor:
-    def __init__(self, filename='data/train-full-isw-release.tsv'):
+    def __init__(self, filename='data/full-isw-release.tsv'):
         logger.info('------ Preprocssing ISW German corpus ------')
         self.file = open(filename, encoding='utf-8')
         self.sentences, self.labels, self.flat_labels = self.get_sentences_and_labels()
@@ -211,15 +211,6 @@ class IswPreprocessor:
         labels = [list(map(lambda x: x if x != 'NONE' else 'O', i)) for i in labels]
 
         return sentences, labels, flat_labels
-
-    # def get_tag2idx_idx2tag(self):
-    #     """
-    #     return : dict of tag2idx : {'B-ADD': 0, 'B-AGE': 1, 'B-ART': 2, 'B-CARDINAL': 3,'B-CREAT': 4, ...}
-    #     return : dict of idx2tag : inverted
-    #     """
-    #     tag2idx = {t: i for i, t in enumerate(sorted(self.ners_vals), 1)}
-    #     idx2tag = {i: t for t, i in tag2idx.items()}
-    #     return tag2idx, idx2tag
 
 
 class TweetPreprocessor:

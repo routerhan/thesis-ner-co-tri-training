@@ -146,6 +146,8 @@ celerybeat-schedule
 /tw_model/*
 /onto_model/*
 /model_2/*
+/data/*.pkl
+unlabel_sentences/*
 
 # mypy
 .mypy_cache/

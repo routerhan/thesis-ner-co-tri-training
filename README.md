@@ -3,9 +3,7 @@ This repo is aiming to implementing the co-training and tri-training framework t
 
 # To train model : 
 
-`python run_ner.py --do_train --do_eval --max_seq_length 128 --data_dir data/train-full-isw-release.tsv`
-
-`python run_ner.py --data_dir data/train-full-isw-release.tsv --bert_model bert-base-german-cased --output_dir isw_model/ --max_seq_length 75 --do_train --do_eval --eval_on data/dev-full-isw-release.tsv`
+`python run_ner.py --data_dir data/full-isw-release.tsv --bert_model bert-base-german-cased --output_dir isw_model/ --max_seq_length 75 --do_train --do_eval --eval_on dev`
 
 `python run_ner.py --data_dir data/onto.train.ner.sample --bert_model bert-base-cased --output_dir onto_model/ --max_seq_length 75 --do_train --do_eval --eval_on data/onto.development.ner.sample`
 

@@ -1,5 +1,5 @@
 from __future__ import absolute_import, division, print_function
-
+import joblib
 import argparse
 import csv
 import json
@@ -20,6 +20,7 @@ from torch.utils.data import (DataLoader, RandomSampler, SequentialSampler,
 from torch.utils.data.distributed import DistributedSampler
 from tqdm import tqdm, trange
 from preprocessor import IswPreprocessor, TweetPreprocessor, convert_examples_to_features, InputFeatures
+from train_test_split import split_data
 
 from seqeval.metrics import classification_report
 
@@ -33,7 +34,7 @@ class Ner(BertForTokenClassification):
     def forward(self, input_ids, token_type_ids=None, attention_mask=None, labels=None,valid_ids=None,attention_mask_label=None):
         sequence_output = self.bert(input_ids, token_type_ids, attention_mask,head_mask=None)[0]
         batch_size,max_len,feat_dim = sequence_output.shape
-        valid_output = torch.zeros(batch_size,max_len,feat_dim,dtype=torch.float32,device='cuda')
+        valid_output = torch.zeros(batch_size,max_len,feat_dim,dtype=torch.float32,device="cuda" if torch.cuda.is_available() else "cpu")
         for i in range(batch_size):
             jj = -1
             for j in range(max_len):
@@ -63,7 +64,7 @@ def main():
 
     ## Required parameters
     parser.add_argument("--data_dir",
-                        default='data/train-full-isw-release.tsv',
+                        default='data/full-isw-release.tsv',
                         type=str,
                         required=True,
                         help="The input data dir. Should contain the .tsv files (or other data files) for the task.")
@@ -79,7 +80,7 @@ def main():
     parser.add_argument("--output_dir",
                         default='models/',
                         type=str,
-                        required=False,
+                        required=True,
                         help="The output directory where the model predictions and checkpoints will be written.")
 
     ## Other parameters
@@ -100,7 +101,7 @@ def main():
                         action='store_true',
                         help="Whether to run eval or not.")
     parser.add_argument("--eval_on",
-                        default="data/dev-full-isw-release.tsv",
+                        default="dev",
                         help="Whether to run eval on the dev set or test set.")
     parser.add_argument("--do_lower_case",
                         action='store_true',
@@ -191,18 +192,12 @@ def main():
         os.makedirs(args.output_dir)
 
     task_name = args.task_name.lower()
-
-
-    # Base on the data_dir to load preprocessed sentences, labels and tag2idx
-    if "isw" in str(args.data_dir):
-        pre = IswPreprocessor(filename=args.data_dir)
-    elif "headlines" in str(args.data_dir):
-        pre = TweetPreprocessor(filename=args.data_dir)
-    # Examples
-    sentences = pre.sentences
-    labels = pre.labels
-    label_list = pre.get_labels()
-    num_labels = len(label_list) + 1
+    
+    # Do train/dev/test split ....
+    label_list, num_labels = split_data(data_dir=args.data_dir)
+    # Load training data
+    sentences = joblib.load('data/train-isw-sentences.pkl')
+    labels = joblib.load('data/train-isw-labels.pkl')
 
     tokenizer = BertTokenizer.from_pretrained(args.bert_model, do_lower_case=args.do_lower_case)
 
@@ -255,13 +250,10 @@ def main():
     global_step = 0
     nb_tr_steps = 0
     tr_loss = 0
-    label_map = {i : label for i, label in enumerate(label_list,1)}
     if args.do_train:
         train_features = convert_examples_to_features(
             all_sentences=sentences, all_labels=labels, 
             label_list=label_list, max_seq_length=args.max_seq_length, tokenizer=tokenizer)
-        # train_features = convert_examples_to_features(
-        #     train_examples, label_list, args.max_seq_length, tokenizer)
         logger.info("***** Running training *****")
         logger.info("  Num examples = %d", len(sentences))
         logger.info("  Batch size = %d", args.train_batch_size)
@@ -329,9 +321,7 @@ def main():
             "gradient_accumulation_steps":args.gradient_accumulation_steps,
             "num_labels":len(label_list)+1,"label_map":label_map
             }
-        # model_config = {"bert_model":args.bert_model,"do_lower":args.do_lower_case,"max_seq_length":args.max_seq_length,"num_labels":len(label_list)+1,"label_map":label_map}
         json.dump(model_config,open(os.path.join(args.output_dir,"model_config.json"),"w"))
-        # Load a trained model and config that you have fine-tuned
     else:
         # Load a trained model and vocabulary that you have fine-tuned
         model = Ner.from_pretrained(args.output_dir)
@@ -340,24 +330,24 @@ def main():
     model.to(device)
 
     if args.do_eval and (args.local_rank == -1 or torch.distributed.get_rank() == 0):
-        if args.eval_on == "data/dev-full-isw-release.tsv":
-            if "isw" in str(args.data_dir):
-                pre = IswPreprocessor(filename=args.data_dir)
-            
-            # Examples
-            eval_sentences = pre.sentences
-            eval_labels = pre.labels
-            eval_label_list = pre.get_labels()
-            # eval_examples = processor.get_dev_examples(args.data_dir)
+        if args.eval_on == "dev":
+            eval_sentences = joblib.load('data/dev-isw-sentences.pkl')
+            eval_labels = joblib.load('data/dev-isw-labels.pkl')
+            # TO check : label_list should be the whole list ?
+            eval_label_list = label_list
         elif args.eval_on == "test":
-            pass
-            # eval_examples = processor.get_test_examples(args.data_dir)
-        # else:
-        #     raise ValueError("eval on dev or test set only")
+            eval_sentences = joblib.load('data/test-isw-sentences.pkl')
+            eval_labels = joblib.load('data/test-isw-labels.pkl')
+            # TO check : label_list should be the whole list ?
+            eval_label_list = label_list
+        else:
+            raise ValueError("eval on dev or test set only")
+
+        # Convert into features for testing
         eval_features = convert_examples_to_features(
             all_sentences=eval_sentences, all_labels=eval_labels, 
             label_list=eval_label_list, max_seq_length=args.max_seq_length, tokenizer=tokenizer)
-        logger.info("***** Running evaluation *****")
+        logger.info("***** Running evaluation: {} *****".format(args.eval_on))
         logger.info("  Num examples = %d", len(eval_sentences))
         logger.info("  Batch size = %d", args.eval_batch_size)
         all_input_ids = torch.tensor([f.input_ids for f in eval_features], dtype=torch.long)
@@ -410,7 +400,7 @@ def main():
         logger.info("\n%s", report)
         output_eval_file = os.path.join(args.output_dir, "eval_results.txt")
         with open(output_eval_file, "w") as writer:
-            logger.info("***** Eval results *****")
+            logger.info("***** Eval results: {} *****".format(args.eval_on))
             logger.info("\n%s", report)
             writer.write(report)
 
