@@ -1,12 +1,9 @@
-from __future__ import absolute_import, division, print_function
 import joblib
 import argparse
-import csv
 import json
 import logging
 import os
 import random
-import sys
 
 import numpy as np
 import torch
@@ -19,7 +16,7 @@ from torch.utils.data import (DataLoader, RandomSampler, SequentialSampler,
                               TensorDataset)
 from torch.utils.data.distributed import DistributedSampler
 from tqdm import tqdm, trange
-from preprocessor import IswPreprocessor, TweetPreprocessor, convert_examples_to_features, InputFeatures
+from preprocessor import IswPreprocessor, convert_examples_to_features, InputFeatures
 from utils import split_data
 
 from seqeval.metrics import classification_report
