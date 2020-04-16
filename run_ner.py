@@ -20,7 +20,7 @@ from torch.utils.data import (DataLoader, RandomSampler, SequentialSampler,
 from torch.utils.data.distributed import DistributedSampler
 from tqdm import tqdm, trange
 from preprocessor import IswPreprocessor, TweetPreprocessor, convert_examples_to_features, InputFeatures
-from train_test_split import split_data
+from utils import split_data
 
 from seqeval.metrics import classification_report
 
