@@ -189,17 +189,16 @@ def main():
         os.makedirs(args.output_dir)
 
     task_name = args.task_name.lower()
-    
-    # Do train/dev/test split ....
-    label_list, num_labels = split_data(data_dir=args.data_dir)
-    # Load training data
-    sentences = joblib.load('data/train-isw-sentences.pkl')
-    labels = joblib.load('data/train-isw-labels.pkl')
-
-    tokenizer = BertTokenizer.from_pretrained(args.bert_model, do_lower_case=args.do_lower_case)
 
     num_train_optimization_steps = 0
     if args.do_train:
+        # Do train/dev/test split ....
+        label_list, num_labels = split_data(data_dir=args.data_dir)
+        # Load training data
+        sentences = joblib.load('data/train-isw-sentences.pkl')
+        labels = joblib.load('data/train-isw-labels.pkl')
+
+    tokenizer = BertTokenizer.from_pretrained(args.bert_model, do_lower_case=args.do_lower_case)
         # train_examples = processor.get_train_examples(args.data_dir)
         num_train_optimization_steps = int(
             len(sentences) / args.train_batch_size / args.gradient_accumulation_steps) * args.num_train_epochs
