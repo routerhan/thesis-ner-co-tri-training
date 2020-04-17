@@ -208,7 +208,7 @@ def main():
         torch.distributed.barrier()  # Make sure only the first process in distributed training will download model & vocab
 
     # Prepare model
-    config = BertConfig.from_pretrained(args.bert_model, num_labels=num_labels, finetuning_task=args.task_name)
+    config = BertConfig.from_pretrained(args.bert_model, finetuning_task=args.task_name)
     model = Ner.from_pretrained(args.bert_model,
               from_tf = False,
               config = config)
@@ -325,10 +325,16 @@ def main():
     model.to(device)
 
     if args.do_eval and (args.local_rank == -1 or torch.distributed.get_rank() == 0):
+        with open('{}/model_config.json'.format(args.output_dir)) as f:
+            config = json.load(f)
+        label_list = [label for label in config['label_map'].values()]
         if args.eval_on == "dev":
             eval_sentences = joblib.load('data/dev-isw-sentences.pkl')
             eval_labels = joblib.load('data/dev-isw-labels.pkl')
-            # TO check : label_list should be the whole list ?
+            # TO check : label_list should be the whole list ? => load label list from model_config 
+            with open('model_config.json') as f:
+                config = json.load(f)
+            label_list = [label for label in config['label_map'].values()]
             eval_label_list = label_list
         elif args.eval_on == "test":
             eval_sentences = joblib.load('data/test-isw-sentences.pkl')
