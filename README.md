@@ -20,7 +20,10 @@ The task is focusing on `semi-supervised learning`, therefore there are a small 
 # Quick Start : 
 
 ## Train the baseline BERT model
-`python run_ner.py --data_dir data/full-isw-release.tsv --bert_model bert-base-german-cased --output_dir isw_model/ --max_seq_length 128 --do_train --do_eval --eval_on dev`
+`python run_ner.py --data_dir data/full-isw-release.tsv --bert_model bert-base-german-cased --output_dir baseline_model/ --max_seq_length 128 --do_train --do_eval --eval_on dev`
+
+## Evaluate the model on dev or test set
+``python run_ner.py --data_dir data/full-isw-release.tsv --output_dir baseline_model/ --max_seq_length 128 --do_eval --eval_on test``
 
 ## Performance:
 `Train/dev/test : 70/20/10`
