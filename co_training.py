@@ -31,13 +31,13 @@ class CoTraining:
 	u - The size of the pool of unlabeled samples from which the classifier can choose. Default - 75 
 	"""
 
-	def __init__(self, modelA_dir:str, modelB_dir:str, top_n=5, k=3, u=40, save_file=False, ignore_O=True):
+	def __init__(self, modelA_dir:str, modelB_dir:str, top_n=5, k=3, u=40, save_tagging=False, ignore_O=True):
 		self.ignore_O = ignore_O
 		self.top_n = top_n
 		self.k = k
 		self.u = u
-		self.predA = self.get_preds(model_dir=modelA_dir, save_preds=save_file)
-		self.predB = self.get_preds(model_dir=modelB_dir, save_preds=save_file)
+		self.predA = self.get_preds(model_dir=modelA_dir, save_preds=save_tagging)
+		self.predB = self.get_preds(model_dir=modelB_dir, save_preds=save_tagging)
 
 
 	def load_unlabeled_set(self, unlabeled_dir='unlabel_sentences/2017_sentences.pkl'):
@@ -132,7 +132,7 @@ class CoTraining:
 
 
 
-co_train = CoTraining(modelA_dir='isw_model/', modelB_dir='models', save_file=True)
+co_train = CoTraining(modelA_dir='isw_model/', modelB_dir='models', save_tagging=True)
 unlabeled_sents = co_train.load_unlabeled_set(unlabeled_dir='unlabel_sentences/2017_sentences.pkl')
 print('U set:', unlabeled_sents[:3])
 print('save agree', co_train.get_agree_preds(save_agree=True))
