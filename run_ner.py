@@ -20,6 +20,7 @@ from tqdm import tqdm, trange
 from preprocessor import IswPreprocessor, convert_examples_to_features, InputFeatures
 from utils import split_data
 from sklearn.metrics import classification_report
+from seqeval.metrics import classification_report
 
 logging.basicConfig(format = '%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
                     datefmt = '%m/%d/%Y %H:%M:%S',
@@ -394,14 +395,7 @@ def main():
                         temp_1.append(label_map[label_ids[i][j]])
                         temp_2.append(label_map[logits[i][j]])
         
-        #Get sorted label list for the report
-        label_list.remove('[CLS]')
-        label_list.remove('[SEP]')
-        label_list.remove('O')
-        sorted_label_list = sorted(set([re.sub('B-|I-', '', label) for label in label_list]))
-
-        logger.info("  Num Labels = %d", len(sorted_label_list))
-        report = classification_report(y_true, y_pred, digits=4, labels=sorted_label_list)
+        report = classification_report(y_true, y_pred, digits=4)
         logger.info("\n%s", report)
         output_eval_file = os.path.join(args.output_dir, "eval_results.txt")
         with open(output_eval_file, "w") as writer:
