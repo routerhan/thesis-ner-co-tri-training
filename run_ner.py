@@ -206,41 +206,41 @@ def main():
 
     if args.local_rank not in [-1, 0]:
         torch.distributed.barrier()  # Make sure only the first process in distributed training will download model & vocab
+    if args.do_train:
+        # Prepare initialized model
+        config = BertConfig.from_pretrained(args.bert_model, num_labels=num_labels, finetuning_task=args.task_name)
+        model = Ner.from_pretrained(args.bert_model,
+                from_tf = False,
+                config = config)
 
-    # Prepare model
-    config = BertConfig.from_pretrained(args.bert_model, finetuning_task=args.task_name)
-    model = Ner.from_pretrained(args.bert_model,
-              from_tf = False,
-              config = config)
+        if args.local_rank == 0:
+            torch.distributed.barrier()  # Make sure only the first process in distributed training will download model & vocab
 
-    if args.local_rank == 0:
-        torch.distributed.barrier()  # Make sure only the first process in distributed training will download model & vocab
+        model.to(device)
+        param_optimizer = list(model.named_parameters())
+        no_decay = ['bias','LayerNorm.weight']
+        optimizer_grouped_parameters = [
+            {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], 'weight_decay': args.weight_decay},
+            {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
+            ]
+        warmup_steps = int(args.warmup_proportion * num_train_optimization_steps)
+        optimizer = AdamW(optimizer_grouped_parameters, lr=args.learning_rate, eps=args.adam_epsilon)
+        scheduler = WarmupLinearSchedule(optimizer, warmup_steps=warmup_steps, t_total=num_train_optimization_steps)
+        if args.fp16:
+            try:
+                from apex import amp
+            except ImportError:
+                raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
+            model, optimizer = amp.initialize(model, optimizer, opt_level=args.fp16_opt_level)
 
-    model.to(device)
-    param_optimizer = list(model.named_parameters())
-    no_decay = ['bias','LayerNorm.weight']
-    optimizer_grouped_parameters = [
-        {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], 'weight_decay': args.weight_decay},
-        {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
-        ]
-    warmup_steps = int(args.warmup_proportion * num_train_optimization_steps)
-    optimizer = AdamW(optimizer_grouped_parameters, lr=args.learning_rate, eps=args.adam_epsilon)
-    scheduler = WarmupLinearSchedule(optimizer, warmup_steps=warmup_steps, t_total=num_train_optimization_steps)
-    if args.fp16:
-        try:
-            from apex import amp
-        except ImportError:
-            raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
-        model, optimizer = amp.initialize(model, optimizer, opt_level=args.fp16_opt_level)
+        # multi-gpu training (should be after apex fp16 initialization)
+        if n_gpu > 1:
+            model = torch.nn.DataParallel(model)
 
-    # multi-gpu training (should be after apex fp16 initialization)
-    if n_gpu > 1:
-        model = torch.nn.DataParallel(model)
-
-    if args.local_rank != -1:
-        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.local_rank],
-                                                          output_device=args.local_rank,
-                                                          find_unused_parameters=True)
+        if args.local_rank != -1:
+            model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.local_rank],
+                                                            output_device=args.local_rank,
+                                                            find_unused_parameters=True)
 
     global_step = 0
     nb_tr_steps = 0
