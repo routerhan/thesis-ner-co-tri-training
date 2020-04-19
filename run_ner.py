@@ -397,10 +397,9 @@ def main():
         
         report = classification_report(y_true, y_pred, digits=4)
         logger.info("\n%s", report)
-        output_eval_file = os.path.join(args.output_dir, "eval_results.txt")
+        output_eval_file = os.path.join(args.output_dir, "{}_results.txt".format(args.eval_on))
         with open(output_eval_file, "w") as writer:
-            logger.info("***** Eval results: {} *****".format(args.eval_on))
-            logger.info("\n%s", report)
+            logger.info("***** Save the results to {}: {}_results.txt *****".format(args.output_dir, args.eval_on))
             writer.write(report)
 
 
