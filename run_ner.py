@@ -19,7 +19,6 @@ from torch.utils.data.distributed import DistributedSampler
 from tqdm import tqdm, trange
 from preprocessor import IswPreprocessor, convert_examples_to_features, InputFeatures
 from utils import split_data
-from sklearn.metrics import classification_report
 from seqeval.metrics import classification_report
 
 logging.basicConfig(format = '%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
