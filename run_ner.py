@@ -332,9 +332,6 @@ def main():
             eval_sentences = joblib.load('data/dev-isw-sentences.pkl')
             eval_labels = joblib.load('data/dev-isw-labels.pkl')
             # TO check : label_list should be the whole list ? => load label list from model_config 
-            with open('model_config.json') as f:
-                config = json.load(f)
-            label_list = [label for label in config['label_map'].values()]
             eval_label_list = label_list
         elif args.eval_on == "test":
             eval_sentences = joblib.load('data/test-isw-sentences.pkl')
