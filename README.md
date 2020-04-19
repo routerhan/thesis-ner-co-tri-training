@@ -20,10 +20,10 @@ The task is focusing on `semi-supervised learning`, therefore there are a small 
 # Quick Start : 
 
 ## Train the baseline BERT model
-`python run_ner.py --data_dir data/full-isw-release.tsv --bert_model bert-base-german-cased --output_dir baseline_model/ --max_seq_length 128 --do_train --do_eval --eval_on dev`
+`python run_ner.py --data_dir data/full-isw-release.tsv --bert_model bert-base-german-cased --output_dir baseline_model/ --max_seq_length 128 --do_train`
 
 ## Evaluate the model on dev or test set
-``python run_ner.py --data_dir data/full-isw-release.tsv --output_dir baseline_model/ --max_seq_length 128 --do_eval --eval_on test``
+`python run_ner.py --data_dir data/full-isw-release.tsv --output_dir baseline_model/ --max_seq_length 128 --do_eval --eval_on test`
 
 ## Performance:
 `Train/dev/test : 70/20/10`
@@ -50,81 +50,83 @@ The task is focusing on `semi-supervised learning`, therefore there are a small 
 
 
 ```
-***** Running evaluation: dev *****
-Num examples = 3217
-Batch size = 8
-Evaluating: 100%|############################################| 403/403 
+04/19/2020 23:32:28 - INFO - __main__ -   ***** Running evaluation: dev *****
+04/19/2020 23:32:28 - INFO - __main__ -     Num examples = 3217
+04/19/2020 23:32:28 - INFO - __main__ -     Batch size = 8
 
              precision    recall  f1-score   support
 
-        NRP     0.9226    0.9189    0.9207       493
-       DATE     0.7750    0.7561    0.7654       246
-        LAN     0.9432    0.9555    0.9493       382
-        EVT     0.9143    0.7805    0.8421        41
-        GPE     0.9642    0.9706    0.9674       749
-       TIME     0.8556    0.9163    0.8849       705
-       FREQ     0.7838    0.8056    0.7945       108
-        FAC     0.6716    0.7759    0.7200        58
-        DUR     0.6942    0.6844    0.6893       282
-    ORDINAL     0.8750    0.8235    0.8485        85
-        PER     0.8211    0.8715    0.8455       179
-        AGE     0.6444    0.5743    0.6073       101
-        ART     0.4545    0.2778    0.3448        18
-       SORD     0.7273    0.7111    0.7191        45
-        LOC     0.7674    0.7500    0.7586        44
-       MISC     0.7500    0.6667    0.7059        27
-       PERC     1.0000    1.0000    1.0000         8
-    PRODUCT     0.0000    0.0000    0.0000         7
-   CARDINAL     0.8652    0.8280    0.8462        93
-       FRAC     0.4000    0.5000    0.4444         4
-        MON     0.6667    0.6667    0.6667         9
-      TITLE     0.8235    0.8235    0.8235        17
         ORG     0.6471    0.6667    0.6567        66
+        PER     0.8211    0.8715    0.8455       179
+   CARDINAL     0.8652    0.8280    0.8462        93
+        GPE     0.9642    0.9706    0.9674       749
+        DUR     0.6942    0.6844    0.6893       282
+       FREQ     0.7838    0.8056    0.7945       108
+        LAN     0.9432    0.9555    0.9493       382
+       DATE     0.7750    0.7561    0.7654       246
+        NRP     0.9226    0.9189    0.9207       493
+        LOC     0.7674    0.7500    0.7586        44
+        AGE     0.6444    0.5743    0.6073       101
+       TIME     0.8556    0.9163    0.8849       705
+       RATE     0.0000    0.0000    0.0000         3
+        FAC     0.6716    0.7759    0.7200        58
+      TITLE     0.8235    0.8235    0.8235        17
+        EVT     0.9143    0.7805    0.8421        41
+       SORD     0.7273    0.7111    0.7191        45
+    ORDINAL     0.8750    0.8235    0.8485        85
+        ART     0.4545    0.2778    0.3448        18
+       MISC     0.7500    0.6667    0.7059        27
+        MON     0.6667    0.6667    0.6667         9
+       FRAC     0.4000    0.5000    0.4444         4
+       PERC     1.0000    1.0000    1.0000         8
+        MED     0.0000    0.0000    0.0000         1
       QUANT     0.7143    0.6250    0.6667         8
+    PRODUCT     0.0000    0.0000    0.0000         7
         ADD     0.0000    0.0000    0.0000         1
        PROJ     1.0000    1.0000    1.0000         2
-        MED     0.0000    0.0000    0.0000         1
-       RATE     0.0000    0.0000    0.0000         3
         LAW     1.0000    1.0000    1.0000         1
 
 avg / total     0.8541    0.8631    0.8580      3783
+
+04/19/2020 23:32:57 - INFO - __main__ -   ***** Save the results to baseline_model/: dev_results.txt *****
 ```
 
 ```
-- INFO - __main__ -   ***** Running evaluation: test *****
-- INFO - __main__ -     Num examples = 1609
-- INFO - __main__ -     Batch size = 8
-- INFO - __main__ -   ***** Eval results: test *****
-- INFO - __main__ -   
+04/19/2020 23:36:00 - INFO - __main__ -   ***** Running evaluation: test *****
+04/19/2020 23:36:00 - INFO - __main__ -     Num examples = 1609
+04/19/2020 23:36:00 - INFO - __main__ -     Batch size = 8
+
              precision    recall  f1-score   support
 
-    ORDINAL     0.7143    0.8333    0.7692        36
-        NRP     0.9225    0.9049    0.9136       263
-        GPE     0.9675    0.9808    0.9741       364
-        LAN     0.9263    0.9670    0.9462       182
        DATE     0.7757    0.7830    0.7793       106
+       TIME     0.8685    0.8955    0.8818       354
+        NRP     0.9225    0.9049    0.9136       263
    CARDINAL     0.8364    0.7667    0.8000        60
+        GPE     0.9675    0.9808    0.9741       364
+        LOC     0.5714    0.4000    0.4706        10
+        PER     0.8462    0.9462    0.8934        93
+        LAN     0.9263    0.9670    0.9462       182
+        ORG     0.7812    0.7143    0.7463        35
         DUR     0.6639    0.5786    0.6183       140
         AGE     0.7027    0.6341    0.6667        41
-       TIME     0.8685    0.8955    0.8818       354
-        PER     0.8462    0.9462    0.8934        93
-        ORG     0.7812    0.7143    0.7463        35
        FREQ     0.7451    0.8636    0.8000        44
         EVT     0.8750    0.7778    0.8235        18
-       SORD     0.8438    0.7500    0.7941        36
-        ART     0.3636    0.3636    0.3636        11
-       MISC     0.8182    0.5294    0.6429        17
       TITLE     1.0000    1.0000    1.0000        14
-        LOC     0.5714    0.4000    0.4706        10
-       RATE     0.0000    0.0000    0.0000         1
-    PRODUCT     0.0000    0.0000    0.0000         2
-        FAC     0.8333    0.9091    0.8696        22
-        MON     1.0000    1.0000    1.0000        10
-      QUANT     1.0000    1.0000    1.0000         2
+       SORD     0.8438    0.7500    0.7941        36
+    ORDINAL     0.7143    0.8333    0.7692        36
+       MISC     0.8182    0.5294    0.6429        17
        PERC     1.0000    0.3333    0.5000         3
+        FAC     0.8333    0.9091    0.8696        22
+        ART     0.3636    0.3636    0.3636        11
+        MON     1.0000    1.0000    1.0000        10
+       RATE     0.0000    0.0000    0.0000         1
+      QUANT     1.0000    1.0000    1.0000         2
+    PRODUCT     0.0000    0.0000    0.0000         2
        PROJ     0.0000    0.0000    0.0000         1
 
 avg / total     0.8614    0.8633    0.8609      1865
+
+04/19/2020 23:36:15 - INFO - __main__ -   ***** Save the results to baseline_model/: test_results.txt *****
 ```
 
 # Basline model configuration
