@@ -393,8 +393,15 @@ def main():
                     else:
                         temp_1.append(label_map[label_ids[i][j]])
                         temp_2.append(label_map[logits[i][j]])
+        
+        #Get sorted label list for the report
+        label_list.remove('[CLS]')
+        label_list.remove('[SEP]')
+        label_list.remove('O')
+        sorted_label_list = sorted(set([re.sub('B-|I-', '', label) for label in label_list]))
 
-        report = classification_report(y_true, y_pred,digits=4)
+        logger.info("  Num Labels = %d", len(sorted_label_list))
+        report = classification_report(y_true, y_pred, digits=4, label=sorted_label_list)
         logger.info("\n%s", report)
         output_eval_file = os.path.join(args.output_dir, "eval_results.txt")
         with open(output_eval_file, "w") as writer:
