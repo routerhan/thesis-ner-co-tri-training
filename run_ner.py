@@ -402,7 +402,7 @@ def main():
         sorted_label_list = sorted(set([re.sub('B-|I-', '', label) for label in label_list]))
 
         logger.info("  Num Labels = %d", len(sorted_label_list))
-        report = classification_report(y_true, y_pred, digits=4, label=sorted_label_list)
+        report = classification_report(y_true, y_pred, digits=4, labels=sorted_label_list)
         logger.info("\n%s", report)
         output_eval_file = os.path.join(args.output_dir, "eval_results.txt")
         with open(output_eval_file, "w") as writer:
