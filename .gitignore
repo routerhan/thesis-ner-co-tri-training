@@ -143,10 +143,12 @@ celerybeat-schedule
 /models/*
 /logs/*
 /isw_model/*
+/test_model/*
 /tw_model/*
 /onto_model/*
 /model_2/*
 /data/*.pkl
+/data/data/full-isw-release.tsv
 unlabel_sentences/*
 
 # mypy
