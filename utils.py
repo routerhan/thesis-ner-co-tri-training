@@ -2,7 +2,7 @@ import logging
 import joblib
 from sklearn.model_selection import train_test_split
 from collections import Counter
-from preprocessor import IswPreprocessor
+from preprocessor import IswPreprocessor, OntoPreprocessor
 
 logging.basicConfig(format = '%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
                     datefmt = '%m/%d/%Y %H:%M:%S',
@@ -12,13 +12,16 @@ logger = logging.getLogger(__name__)
 def split_data(data_dir='data/full-isw-release.tsv'):
     """
     This function will split the full dataset into `train`, `dev`, `test` and save the results.
-
+    input : data_dir : 'data/full-isw-release.tsv' | '../OntoNotes-5.0-NER-BIO/onto.train.ner'
     return : the num of labels on full-data-set (not only train data or dev data)
     """
 
     if "isw" in str(data_dir):
         dataset = "isw"
         pre = IswPreprocessor(filename=data_dir)
+    elif "onto" in str(data_dir):
+        dataset = "onto"
+        pre = OntoPreprocessor(filename=data_dir)
 
     sentences = pre.sentences
     labels = pre.labels

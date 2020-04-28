@@ -162,6 +162,15 @@ avg / total     0.8614    0.8633    0.8609      1865
 }
 ```
 
+# OntoNotes 5.0 Model -- English
+
+## Train the OntoNote 5.0 Eng model
+`python run_ner.py --data_dir ../OntoNotes-5.0-NER-BIO/onto.train.ner --bert_model bert-base-uncased --output_dir onto_model/ --max_seq_length 128 --do_train`
+
+## Evaluate the model on dev or test set
+`python run_ner.py --data_dir ../OntoNotes-5.0-NER-BIO/onto.test.ner --output_dir onto_model/ --max_seq_length 128 --do_eval --eval_on test`
+
+
 # Simple API
 For giving you an idea on the model prediction and further investigation. 
 

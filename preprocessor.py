@@ -116,7 +116,7 @@ def convert_examples_to_features(all_sentences, all_labels, label_list, max_seq_
 
 
 class OntoPreprocessor:
-    def __init__(self, filename='data/onto.train.ner.sample'):
+    def __init__(self, filename='../OntoNotes-5.0-NER-BIO/onto.test.ner'):
         logger.info('------ Preprocssing OntoNote English corpus ------')
         self.file = open(filename, encoding='utf-8')
         self.sentences, self.labels, self.flat_labels = self.get_sentences_and_labels()
@@ -209,7 +209,6 @@ class IswPreprocessor:
 
         return sentences, labels, flat_labels
 
-
 class TweetPreprocessor:
     def __init__(self, filename='data/merged_headlines_annos.compact.tsv'):
         logger.info('------ Preprocssing Tweets corpus ------')
@@ -258,12 +257,13 @@ class TweetPreprocessor:
         tag2idx = {t: i for i, t in enumerate(sorted(self.ners_vals), 1)}
         idx2tag = {i: t for t, i in tag2idx.items()}
         return tag2idx, idx2tag
-# filename='data/onto.train.ner.sample'
-# pre = OntoPreprocessor()
-# print('sen', pre.sentences)
-# print('label', pre.labels)
+
+# filename='../OntoNotes-5.0-NER-BIO/onto.train.ner'
+# pre = OntoPreprocessor(filename=filename)
+# print('sen', pre.sentences[:2])
+# print('label', pre.labels[:2])
 # print('lab_list', pre.get_labels())
-# # print('data', pre.readfile(filename))
+
 
 # pre2 = IswPreprocessor()
 # print('sen', pre2.sentences[:2])
