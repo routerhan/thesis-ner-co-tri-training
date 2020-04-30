@@ -17,7 +17,7 @@ from torch.utils.data import (DataLoader, RandomSampler, SequentialSampler,
                               TensorDataset)
 from torch.utils.data.distributed import DistributedSampler
 from tqdm import tqdm, trange
-from preprocessor import IswPreprocessor, convert_examples_to_features, InputFeatures
+from preprocessor import IswPreprocessor, OntoPreprocessor, convert_examples_to_features, InputFeatures
 from utils import split_data
 from seqeval.metrics import classification_report
 
@@ -192,11 +192,24 @@ def main():
 
     num_train_optimization_steps = 0
     if args.do_train:
-        # Do train/dev/test split ....
-        label_list, num_labels = split_data(data_dir=args.data_dir)
-        # Load training data
-        sentences = joblib.load('data/train-isw-sentences.pkl')
-        labels = joblib.load('data/train-isw-labels.pkl')
+        if "isw" in str(args.data_dir):
+            dataset = "isw"
+            logger.info("***** Loading ISW data *****")
+            # Only do train/dev/test split on ISW dataset
+            label_list, num_labels = split_data(data_dir=args.data_dir)
+            # Load ISW train data
+            sentences = joblib.load('data/train-{}-sentences.pkl'.format(dataset))
+            labels = joblib.load('data/train-{}-labels.pkl'.format(dataset))
+        elif "onto" in str(args.data_dir):
+            dataset = "onto"
+            logger.info("***** Loading OntoNote 5.0 train data *****")
+            pre = OntoPreprocessor(filename=args.data_dir)
+            label_list = pre.get_labels()
+            num_labels = len(label_list) + 1
+            # Load Onto train data
+            sentences = pre.sentences
+            labels = pre.labels
+
         tokenizer = BertTokenizer.from_pretrained(args.bert_model, do_lower_case=args.do_lower_case)
         # train_examples = processor.get_train_examples(args.data_dir)
         num_train_optimization_steps = int(
@@ -328,18 +341,37 @@ def main():
         with open('{}/model_config.json'.format(args.output_dir)) as f:
             config = json.load(f)
         label_list = [label for label in config['label_map'].values()]
-        if args.eval_on == "dev":
-            eval_sentences = joblib.load('data/dev-isw-sentences.pkl')
-            eval_labels = joblib.load('data/dev-isw-labels.pkl')
-            # TO check : label_list should be the whole list ? => load label list from model_config 
-            eval_label_list = label_list
-        elif args.eval_on == "test":
-            eval_sentences = joblib.load('data/test-isw-sentences.pkl')
-            eval_labels = joblib.load('data/test-isw-labels.pkl')
-            # TO check : label_list should be the whole list ?
-            eval_label_list = label_list
-        else:
-            raise ValueError("eval on dev or test set only")
+
+        # Base on the data_dir to get the corresponding eval set
+        if "isw" in str(args.data_dir):
+            dataset = "isw"
+            if args.eval_on == "dev":
+                eval_sentences = joblib.load('data/dev-{}-sentences.pkl'.format(dataset))
+                eval_labels = joblib.load('data/dev-{}-labels.pkl'.format(dataset))
+                eval_label_list = label_list
+            elif args.eval_on == "test":
+                eval_sentences = joblib.load('data/test-{}-sentences.pkl'.format(dataset))
+                eval_labels = joblib.load('data/test-{}-labels.pkl'.format(dataset))
+                eval_label_list = label_list
+            else:
+                raise ValueError("eval on dev or test set only")
+
+        elif "onto" in str(args.data_dir):
+            dataset = "onto"
+            if args.eval_on == "dev":
+                logger.info("***** Loading OntoNote 5.0 dev data *****")
+                pre = OntoPreprocessor(filename='../OntoNotes-5.0-NER-BIO/onto.development.ner')
+                eval_sentences = pre.sentences
+                eval_labels = pre.labels
+                eval_label_list = pre.get_labels()
+            elif args.eval_on == "test":
+                logger.info("***** Loading OntoNote 5.0 test data *****")
+                pre = OntoPreprocessor(filename='../OntoNotes-5.0-NER-BIO/onto.test.ner')
+                eval_sentences = pre.sentences
+                eval_labels = pre.labels
+                eval_label_list = pre.get_labels()
+            else:
+                raise ValueError("eval on dev or test set only")
 
         # Convert into features for testing
         eval_features = convert_examples_to_features(
