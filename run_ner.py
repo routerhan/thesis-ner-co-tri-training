@@ -363,13 +363,13 @@ def main():
                 pre = OntoPreprocessor(filename='../OntoNotes-5.0-NER-BIO/onto.development.ner')
                 eval_sentences = pre.sentences
                 eval_labels = pre.labels
-                eval_label_list = pre.get_labels()
+                eval_label_list = label_list
             elif args.eval_on == "test":
                 logger.info("***** Loading OntoNote 5.0 test data *****")
                 pre = OntoPreprocessor(filename='../OntoNotes-5.0-NER-BIO/onto.test.ner')
                 eval_sentences = pre.sentences
                 eval_labels = pre.labels
-                eval_label_list = pre.get_labels()
+                eval_label_list = label_list
             else:
                 raise ValueError("eval on dev or test set only")
 
