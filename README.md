@@ -20,10 +20,11 @@ The task is focusing on `semi-supervised learning`, therefore there are a small 
 # Quick Start : 
 
 ## Train the baseline BERT model
-`python run_ner.py --data_dir data/full-isw-release.tsv --bert_model bert-base-german-cased --output_dir baseline_model/ --max_seq_length 128 --do_train`
+** Noted that --do_lower_case should be triggered as we are using uncased model.
+`python run_ner.py --data_dir data/full-isw-release.tsv --bert_model bert-base-german-cased --output_dir baseline_model/ --max_seq_length 128 --do_train --do_lower_case`
 
 ## Evaluate the model on dev or test set
-`python run_ner.py --data_dir data/full-isw-release.tsv --output_dir baseline_model/ --max_seq_length 128 --do_eval --eval_on test`
+`python run_ner.py --data_dir data/full-isw-release.tsv --output_dir baseline_model/ --max_seq_length 128 --do_eval --eval_on test --do_lower_case`
 
 ## Performance:
 `Train/dev/test : 70/20/10`
