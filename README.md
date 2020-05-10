@@ -17,7 +17,8 @@ The task is focusing on `semi-supervised learning`, therefore there are a small 
 * Tri-training with teacher-student paradigm, BERT fine-tuned model as base classifier with cross-lingual approach.
 * Tri-training with teacher-student paradigm, BERT fine-tuned model as base classifier but using different BERT pretrained embedding model, with cross-lingual approach.
 
-# Quick Start : 
+# 1. ISW BERT baseline model - German
+* __BERT model : `bert-base-german-cased`__
 
 ## Train the baseline BERT model
 `python run_ner.py --data_dir data/full-isw-release.tsv --bert_model bert-base-german-cased --output_dir baseline_model/ --max_seq_length 128 --do_train`
@@ -25,7 +26,7 @@ The task is focusing on `semi-supervised learning`, therefore there are a small 
 ## Evaluate the model on dev or test set
 `python run_ner.py --data_dir data/full-isw-release.tsv --output_dir baseline_model/ --max_seq_length 128 --do_eval --eval_on test`
 
-## Performance:
+## ISW BERT Performance:
 `Train/dev/test : 70/20/10`
 
 ```
@@ -50,9 +51,9 @@ The task is focusing on `semi-supervised learning`, therefore there are a small 
 
 
 ```
-04/19/2020 23:32:28 - INFO - __main__ -   ***** Running evaluation: dev *****
-04/19/2020 23:32:28 - INFO - __main__ -     Num examples = 3217
-04/19/2020 23:32:28 - INFO - __main__ -     Batch size = 8
+- INFO - __main__ -   ***** Running evaluation: dev *****
+- INFO - __main__ -     Num examples = 3217
+- INFO - __main__ -     Batch size = 8
 
              precision    recall  f1-score   support
 
@@ -88,13 +89,13 @@ The task is focusing on `semi-supervised learning`, therefore there are a small 
 
 avg / total     0.8541    0.8631    0.8580      3783
 
-04/19/2020 23:32:57 - INFO - __main__ -   ***** Save the results to baseline_model/: dev_results.txt *****
+- INFO - __main__ -   ***** Save the results to baseline_model/: dev_results.txt *****
 ```
 
 ```
-04/19/2020 23:36:00 - INFO - __main__ -   ***** Running evaluation: test *****
-04/19/2020 23:36:00 - INFO - __main__ -     Num examples = 1609
-04/19/2020 23:36:00 - INFO - __main__ -     Batch size = 8
+- INFO - __main__ -   ***** Running evaluation: test *****
+- INFO - __main__ -     Num examples = 1609
+- INFO - __main__ -     Batch size = 8
 
              precision    recall  f1-score   support
 
@@ -126,10 +127,10 @@ avg / total     0.8541    0.8631    0.8580      3783
 
 avg / total     0.8614    0.8633    0.8609      1865
 
-04/19/2020 23:36:15 - INFO - __main__ -   ***** Save the results to baseline_model/: test_results.txt *****
+- INFO - __main__ -   ***** Save the results to baseline_model/: test_results.txt *****
 ```
 
-# Basline model configuration
+## Basline isw-model configuration
 ```
 {
     "bert_model": "bert-base-german-cased", 
@@ -162,18 +163,110 @@ avg / total     0.8614    0.8633    0.8609      1865
 }
 ```
 
-# OntoNotes 5.0 Model -- English
+# 2. OntoNotes 5.0 BERT Model - English
+* __BERT model : `bert-base-uncased`__
 
 ## Train the OntoNote 5.0 Eng model
-** Noted that --do_lower_case should be triggered as we are using uncased model.
+* __*Noted that `--do_lower_case` should be triggered as we are using uncased model.__ \
+
 `python run_ner.py --data_dir ../OntoNotes-5.0-NER-BIO/onto.train.ner --bert_model bert-base-uncased --output_dir onto_model/ --max_seq_length 128 --do_train --do_lower_case`
 
 ## Evaluate the model on dev or test set
 `python run_ner.py --data_dir ../OntoNotes-5.0-NER-BIO/onto.test.ner --output_dir onto_model/ --max_seq_length 128 --do_eval --eval_on test --do_lower_case`
 
+## OntoNotes 5.0 BERT Performance
+
+* `dev : /onto.development.ner` \
+```
+***** Running evaluation: dev *****
+  Num examples = 15680
+  Batch size = 8
+- INFO - __main__ -
+             precision    recall  f1-score   support
+
+        ORG     0.8406    0.8606    0.8505      3794
+     PERSON     0.9186    0.9480    0.9331      3154
+       NORP     0.8747    0.8802    0.8774      1277
+       DATE     0.8479    0.8812    0.8642      3200
+   CARDINAL     0.8017    0.8749    0.8367      1719
+    ORDINAL     0.7609    0.8358    0.7966       335
+        GPE     0.9202    0.9113    0.9157      3630
+      MONEY     0.8916    0.9064    0.8989       844
+        LAW     0.3804    0.5385    0.4459        65
+        FAC     0.3756    0.6015    0.4624       133
+   LANGUAGE     0.6122    0.8571    0.7143        35
+    PRODUCT     0.5779    0.4159    0.4837       214
+    PERCENT     0.9064    0.9009    0.9037       656
+       TIME     0.7103    0.7812    0.7441       361
+WORK_OF_ART     0.4375    0.4505    0.4439       202
+        LOC     0.6250    0.6646    0.6442       316
+   QUANTITY     0.7778    0.7000    0.7368       190
+      EVENT     0.5205    0.4246    0.4677       179
+
+avg / total     0.8491    0.8704    0.8590     20304
+```
+* `test : /onto.test.ner`
+```
+***** Running evaluation: test *****
+  Num examples = 12217
+  Batch size = 8
+- INFO - __main__ -
+             precision    recall  f1-score   support
+
+        FAC     0.5600    0.6577    0.6049       149
+       TIME     0.5479    0.6356    0.5885       225
+        GPE     0.9133    0.9057    0.9095      2546
+        ORG     0.8084    0.8432    0.8254      2002
+       NORP     0.8777    0.9131    0.8950       990
+   QUANTITY     0.7394    0.6863    0.7119       153
+     PERSON     0.9074    0.9049    0.9061      2134
+   CARDINAL     0.7813    0.8000    0.7906      1005
+       DATE     0.7997    0.8673    0.8321      1786
+        LOC     0.6034    0.6512    0.6264       215
+      MONEY     0.8522    0.9099    0.8801       355
+    ORDINAL     0.6846    0.7971    0.7366       207
+    PERCENT     0.8571    0.8971    0.8766       408
+WORK_OF_ART     0.5087    0.5207    0.5146       169
+   LANGUAGE     0.7059    0.5455    0.6154        22
+    PRODUCT     0.6111    0.6111    0.6111        90
+      EVENT     0.5667    0.6000    0.5829        85
+        LAW     0.4333    0.5909    0.5000        44
+
+avg / total     0.8287    0.8545    0.8410     12585
+```
+
+## OntoNote 5.0 model configuration
+```
+{
+    "bert_model": "bert-base-uncased", 
+    "do_lower": true, 
+    "train_data_dir": "../OntoNotes-5.0-NER-BIO/onto.train.ner", 
+    "train_batch_size": 32, 
+    "num_train_epochs": 3.0, 
+    "learning_rate": 5e-05, 
+    "adam_epsilon": 1e-08, 
+    "max_grad_norm": 1.0, 
+    "max_seq_length": 128, 
+    "output_dir": "onto_model/", 
+    "seed": 42, 
+    "gradient_accumulation_steps": 1, 
+    "num_labels": 40, 
+    "label_map": 
+    {"1": "B-CARDINAL", "2": "B-DATE", "3": "B-EVENT", "4": "B-FAC", "5": "B-GPE", 
+    "6": "B-LANGUAGE", "7": "B-LAW", "8": "B-LOC", "9": "B-MONEY", "10": "B-NORP", 
+    "11": "B-ORDINAL", "12": "B-ORG", "13": "B-PERCENT", "14": "B-PERSON", "15": "B-PRODUCT", 
+    "16": "B-QUANTITY", "17": "B-TIME", "18": "B-WORK_OF_ART", "19": "I-CARDINAL", "20": "I-DATE", 
+    "21": "I-EVENT", "22": "I-FAC", "23": "I-GPE", "24": "I-LANGUAGE", "25": "I-LAW", 
+    "26": "I-LOC", "27": "I-MONEY", "28": "I-NORP", "29": "I-ORDINAL", "30": "I-ORG", 
+    "31": "I-PERCENT", "32": "I-PERSON", "33": "I-PRODUCT", "34": "I-QUANTITY", "35": "I-TIME", 
+    "36": "I-WORK_OF_ART", "37": "O", "38": "[CLS]", "39": "[SEP]"}
+}
+```
+
+
 
 # Simple API
-For giving you an idea on the model prediction and further investigation. 
+JUST for giving you an idea on the model prediction and further investigation. 
 
 `python api.py`
 
