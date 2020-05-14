@@ -1,6 +1,7 @@
 import os
 import torch
 import json
+import re
 from nltk import word_tokenize
 from pytorch_transformers import BertTokenizer, BertForTokenClassification
 import torch.nn.functional as F
@@ -76,6 +77,9 @@ class Ner:
         return input_ids,input_mask,segment_ids,valid_positions
 
     def predict(self, text: str):
+        # Remove \u200e \u200f ...
+        text = re.sub('[^\w\s]', '', text)
+        
         input_ids,input_mask,segment_ids,valid_ids = self.preprocess(text)
         input_ids = torch.tensor([input_ids],dtype=torch.long,device=self.device)
         input_mask = torch.tensor([input_mask],dtype=torch.long,device=self.device)
@@ -102,6 +106,10 @@ class Ner:
 
         labels = [(self.label_map[label],confidence) for label,confidence in logits]
         words = word_tokenize(text)
+        if len(labels) != len(words):
+            print(words)
+            print("")
+            print(labels)
         assert len(labels) == len(words)
         output = [{"word":word,"tag":label,"confidence":confidence} for word,(label,confidence) in zip(words,labels)]
         return output

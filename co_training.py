@@ -1,6 +1,7 @@
 import os
 import utils
 import logging
+import joblib
 from predict import Ner
 
 logging.basicConfig(format = '%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
@@ -30,46 +31,31 @@ class CoTraining:
 	u - The size of the pool of unlabeled samples from which the classifier can choose. Default - 75 
 	"""
 
-	def __init__(self, modelA_dir:str, modelB_dir:str, top_n=5, k=3, u=40, save_file=False):
+	def __init__(self, modelA_dir:str, modelB_dir:str, top_n=5, k=3, u=40, save_preds=False, unlabel_dir=""):
 		self.top_n = top_n
 		self.k = k
 		self.u = u
-		self.predA = self.get_preds(model_dir=modelA_dir, save_preds=save_file)
-		self.predB = self.get_preds(model_dir=modelB_dir, save_preds=save_file)
+		self.predA = self.get_preds(model_dir=modelA_dir, save_preds=save_preds, unlabel_dir=unlabel_dir)
+		self.predB = self.get_preds(model_dir=modelB_dir, save_preds=save_preds, unlabel_dir=unlabel_dir)
 
 
-	def prep_unlabeled_set(self, unlabeled_dir='data/dev-full-isw-release.tsv'):
+	def prep_unlabeled_set(self, unlabel_dir):
 		"""
 		para : the dir of unlabeled data set
 		return : list of sentences : ['I have apple', 'I am here', 'hello ']
 		"""
-		sentences, sentence = [], []
-		f = open(unlabeled_dir, encoding='utf-8')
-		for line in f:
-			if line.startswith("idx") or line.startswith("0") or line.startswith("NONE"):
-				continue
-			line = line.strip()
-			splits = line.split("\t")
-			if '?' in splits[2] or '.' in splits[2] :
-				if len(sentence)>0:
-					sentences.append(" ".join(sentence))
-					sentence = []
-				continue
-			if splits[3] != 'NONE':
-				sentence.append(splits[3])
-		if len(sentence)>0:
-			sentences.append(" ".join(sentence))
+		sentences = joblib.load(unlabel_dir)
+		# mock small size
+		sentences = sentences[:20] 
 		return sentences
 
-	def get_preds(self, model_dir:str, save_preds:bool):
+	def get_preds(self, model_dir:str, save_preds:bool, unlabel_dir):
 		"""
 		This function will call a model to make prediction and save those prediction as class:PredictFeatures.
 		return : pred_features : PredictFeatures(sentences=sentences[], labels=labels[], avg_cfd_score)
 		"""
 		model = Ner(model_dir=model_dir)
-		unlabeled_sents = self.prep_unlabeled_set(unlabeled_dir='data/dev-full-isw-release.tsv')
-		# mock small size
-		unlabeled_sents = unlabeled_sents[:5] 
+		unlabeled_sents = self.prep_unlabeled_set(unlabel_dir)
 		features = []
 		num_unlabeled_sents = len(unlabeled_sents)
 		for i ,text in enumerate(unlabeled_sents):
@@ -122,9 +108,23 @@ class CoTraining:
 			cos_score = utils.cosine_similarity(A_tag_list=A_tag_list, B_tag_list=B_tag_list)
 
 			compare_list.append((featureA.index, A_tag_list, featureA.avg_cfd_score, B_tag_list, featureB.avg_cfd_score, cos_score))
+		
+		for (sent_index, A_tag_list, A_avg_cfd_score, B_tag_list, B_avg_cfd_score, cos_score) in compare_list:
+			if cos_score > 0.7:
+				i = sent_index
+				# take one model as example
+				print('predA_sent: ', self.predA[i].sentence)
+				print('predA_label: ', self.predA[i].label)
+				print('predA_score: ', self.predA[i].avg_cfd_score)
+				print('')
+				print('predB_sent: ', self.predB[i].sentence)
+				print('predB_label: ', self.predB[i].label)
+				print('predB_score: ', self.predB[i].avg_cfd_score)
+				print('cos_score:', cos_score)
+				break
 
 		if save_agree:
-			with open("agree_results_2.txt", "w") as writer:
+			with open("agree_results.txt", "w") as writer:
 				for feature in compare_list:
 					index, A_label, A_cfd_score, B_label, B_cfd_score, cos_score = feature
 					writer.write(str(index)+'\n')
@@ -141,20 +141,20 @@ class CoTraining:
 
 
 
-co_train = CoTraining(modelA_dir='models/', modelB_dir='model_2', save_file=True)
-unlabeled_sents = co_train.prep_unlabeled_set(unlabeled_dir='data/dev-full-isw-release.tsv')
-print('U set:', unlabeled_sents[:3])
+# co_train = CoTraining(modelA_dir='models/', modelB_dir='test_model', save_preds=True, unlabel_dir='unlabel_sentences/2017_sentences.pkl')
+# unlabeled_sents = co_train.prep_unlabeled_set(unlabel_dir='unlabel_sentences/2017_sentences.pkl')
+# print('U set:', unlabeled_sents[:3])
 
-i = 1
-# take one model as example
-print('predA_sent: ', co_train.predA[i].sentence)
-print('predA_label: ', co_train.predA[i].label)
-print('predA_score: ', co_train.predA[i].avg_cfd_score)
+# i = 32
+# # take one model as example
+# print('predA_sent: ', co_train.predA[i].sentence)
+# print('predA_label: ', co_train.predA[i].label)
+# print('predA_score: ', co_train.predA[i].avg_cfd_score)
 
-print('\n')
-print('predB_sent: ', co_train.predB[i].sentence)
-print('predB_label: ', co_train.predB[i].label)
-print('predB_score: ', co_train.predB[i].avg_cfd_score)
+# print('\n')
+# print('predB_sent: ', co_train.predB[i].sentence)
+# print('predB_label: ', co_train.predB[i].label)
+# print('predB_score: ', co_train.predB[i].avg_cfd_score)
 
-print("run")
-co_train.get_agree_preds(save_agree=True)
+# print("get_agree_preds")
+# co_train.get_agree_preds(save_agree=True)
