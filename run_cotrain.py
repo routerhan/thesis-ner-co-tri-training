@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 def main():
-    # python run_cotrain.py --modelA_dir models --modelB_dir test_model --unlabel_dir unlabel_sentences/2017_sentences.pkl --save_preds --save_agree
+    # python run_cotrain.py --modelA_dir models --modelB_dir test_model --unlabel_dir unlabel_sentences/2017_sentences.pkl --k 10 --u 10 --top_n 3 --save_preds --save_agree
 
     parser = argparse.ArgumentParser()
 
@@ -54,15 +54,17 @@ def main():
     co_train = CoTraining(unlabel_dir=args.unlabel_dir, modelA_dir=args.modelA_dir, modelB_dir=args.modelB_dir, save_preds=args.save_preds, top_n=args.top_n, k=args.k, u=args.u)
     unlabeled_sentences = co_train.prep_unlabeled_set(unlabel_dir=args.unlabel_dir)
 
-    logger.info("***** Running Co-Training *****")
+    logger.info(" ***** Running Co-Training ***** ")
     logger.info(" Model A = {}".format(args.modelA_dir))
     logger.info(" Model B = {}".format(args.modelB_dir))
     logger.info("Top_n: {}, iteration_k: {}, num_unlabel_samples_u: {}".format(args.top_n, args.k, args.u))
-    logger.info("***** Loading Unlabeled Set *****")
+
+    logger.info(" ***** Loading Unlabeled Set ***** ")
     logger.info(" Num of {} samples: {}".format(args.unlabel_dir ,len(unlabeled_sentences)))
     for index ,sentence in enumerate(unlabeled_sentences[:3]):
         logger.info(" sent {} : {}".format(index, sentence))
-    logger.info(" --------- Agree Sent Example --------- ")
+    
+    logger.info(" ***** Agree Sent Example ***** ")
     co_train.get_agree_preds(save_agree=True)
     
 if __name__ == '__main__':
