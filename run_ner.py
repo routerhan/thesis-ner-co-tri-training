@@ -56,6 +56,27 @@ class Ner(BertForTokenClassification):
         else:
             return logits
 
+def load_train_data(data_dir):
+    if "isw" in str(data_dir):
+        dataset = "isw"
+        logger.info("***** Loading ISW data *****")
+        # Only do train/dev/test split on ISW dataset
+        label_list, num_labels = split_data(data_dir=data_dir)
+        # Load ISW train data
+        sentences = joblib.load('data/train-{}-sentences.pkl'.format(dataset))
+        labels = joblib.load('data/train-{}-labels.pkl'.format(dataset))
+    elif "onto" in str(data_dir):
+        dataset = "onto"
+        logger.info("***** Loading OntoNote 5.0 train data *****")
+        pre = OntoPreprocessor(filename=data_dir)
+        label_list = pre.get_labels()
+        num_labels = len(label_list) + 1
+        # Load Onto train data
+        sentences = pre.sentences
+        labels = pre.labels
+
+    return label_list, num_labels, sentences, labels
+
 def main():
     parser = argparse.ArgumentParser()
 
@@ -192,30 +213,12 @@ def main():
 
     num_train_optimization_steps = 0
     if args.do_train:
-        if "isw" in str(args.data_dir):
-            dataset = "isw"
-            logger.info("***** Loading ISW data *****")
-            # Only do train/dev/test split on ISW dataset
-            label_list, num_labels = split_data(data_dir=args.data_dir)
-            # Load ISW train data
-            sentences = joblib.load('data/train-{}-sentences.pkl'.format(dataset))
-            labels = joblib.load('data/train-{}-labels.pkl'.format(dataset))
-        elif "onto" in str(args.data_dir):
-            dataset = "onto"
-            logger.info("***** Loading OntoNote 5.0 train data *****")
-            pre = OntoPreprocessor(filename=args.data_dir)
-            label_list = pre.get_labels()
-            num_labels = len(label_list) + 1
-            # Load Onto train data
-            sentences = pre.sentences
-            labels = pre.labels
+        label_list, num_labels, sentences, labels = load_train_data(data_dir=args.data_dir)
 
         tokenizer = BertTokenizer.from_pretrained(args.bert_model, do_lower_case=args.do_lower_case)
         # train_examples = processor.get_train_examples(args.data_dir)
         num_train_optimization_steps = int(
             len(sentences) / args.train_batch_size / args.gradient_accumulation_steps) * args.num_train_epochs
-        if args.local_rank != -1:
-            num_train_optimization_steps = num_train_optimization_steps // torch.distributed.get_world_size()
 
     if args.local_rank not in [-1, 0]:
         torch.distributed.barrier()  # Make sure only the first process in distributed training will download model & vocab

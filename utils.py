@@ -45,16 +45,11 @@ def split_data(data_dir='data/full-isw-release.tsv'):
 
     return label_list, num_labels
 
-def cosine_similarity(pred_resultA:list, pred_resultB:list):
+def cosine_similarity(A_tag_list:list, B_tag_list:list):
     """
-    pred_result = [  {'confidence': 0.2621215581893921, 'tag': 'O', 'word': 'ich'},
-                {'confidence': 0.0977315902709961, 'tag': 'I-SORD', 'word': 'aus'},
-                {'confidence': 0.1431599259376526, 'tag': 'O', 'word': 'EU'}  ]
+    pred_result = [ ['O', 'O', 'O', 'B-GPE', 'O', 'B-TIME'], [] ...  ]
     return: cosine similarity score for identical check
     """
-    A_tag_list = [dic['tag'] for dic in pred_resultA]
-    B_tag_list = [dic['tag'] for dic in pred_resultB]
-    
     a_vals = Counter(A_tag_list)
     b_vals = Counter(B_tag_list)
     # convert to word-vectors
@@ -65,18 +60,28 @@ def cosine_similarity(pred_resultA:list, pred_resultB:list):
     len_a  = sum(av*av for av in a_vect) ** 0.5
     len_b  = sum(bv*bv for bv in b_vect) ** 0.5
     dot    = sum(av*bv for av,bv in zip(a_vect, b_vect))
-    cosine = dot / (len_a * len_b)
+    try:
+        cosine = dot / (len_a * len_b)
+    except:
+        cosine = 0
     return round(cosine,4)
 
-def get_avg_confident_score(pred_result:list):
+def get_avg_confident_score(pred_result:list, ignore_O=True):
     """
     pred_result = [  {'confidence': 0.2621215581893921, 'tag': 'O', 'word': 'ich'},
                 {'confidence': 0.0977315902709961, 'tag': 'I-SORD', 'word': 'aus'},
                 {'confidence': 0.1431599259376526, 'tag': 'O', 'word': 'EU'}  ]
     return: avg score of every confidence score in result
     """
-    scores = [dic['confidence'] for dic in pred_result]
-    avg_score = sum(scores)/len(scores)
+    if ignore_O:
+        scores = [dic['confidence'] for dic in pred_result if dic['tag'] != 'O']
+    else:
+        scores = [dic['confidence'] for dic in pred_result]
+        
+    try:
+        avg_score = sum(scores)/len(scores)
+    except:
+        avg_score = 0
     return round(avg_score, 4)
 
 def get_hyperparameters(model, ff):
