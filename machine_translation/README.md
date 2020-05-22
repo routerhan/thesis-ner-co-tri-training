@@ -5,9 +5,14 @@
 2. switch to your venv `conda activate venv` , make sure you have python=3.6, pip=20
 3. 
 ```
+cd machine_translation
 git clone https://github.com/joeynmt/joeynmt.git
 cd joeynmt
 pip install .
+
+* Under dir /machine_translation
+mkdir models
+cd models
 ```
 
 ## File Translation
@@ -21,7 +26,7 @@ There are two options, but runing in same way:
 cd wmt_ende_best
 python -m joeynmt translate wmt_ende_best/config.yaml
 ```
-Or
+ 
 ```
 cd wmt_ende_transformer
 python -m joeynmt translate wmt_ende_transformer/config.yaml
@@ -29,5 +34,13 @@ python -m joeynmt translate wmt_ende_transformer/config.yaml
 
 ### Use De-En
 ```
-python -m joeynmt translate iwslt14-deen-bpe/config.yaml
+Under dir /machine_translation
+cd models
+curl -o iwslt14-deen-bpe.tar.gz https://www.cl.uni-heidelberg.de/statnlpgroup/joeynmt/iwslt14-deen-bpe.tar.gz
+tar -xvf iwslt14-deen-bpe.tar.gz
+
+cd /machine_translation
+python -m joeynmt translate models/iwslt14-deen-bpe/config.yaml
+
+python -m joeynmt translate models/iwslt14-deen-bpe/config.yaml < 2017_de_sents.txt --output_path 2017_en_sents.txt
 ```
