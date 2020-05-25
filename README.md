@@ -263,6 +263,38 @@ avg / total     0.8287    0.8545    0.8410     12585
 }
 ```
 
+# Co-Training method
+Co-training algorithm is considered as bootstrap method to boost the amount of labeled set from unlabeled set. 
+
+To apply this method to our project, you could do the following:
+
+## Prerequisite
+1. Make sure you have two model trained. i.e. ISW and Onto models.
+```
+python run_ner.py --data_dir data/full-isw-release.tsv --bert_model bert-base-german-cased --output_dir baseline_model/ --max_seq_length 128 --do_train
+
+python run_ner.py --data_dir ../OntoNotes-5.0-NER-BIO/onto.train.ner --bert_model bert-base-uncased --output_dir onto_model/ --max_seq_length 128 --do_train --do_lower_case
+```
+2. Get cross-lingual training features. i.e. Unlabled set with in German and English version, where we get these by introducing machine translation tools.
+
+* First you need to follow the steps of machine_translation/README.md.
+* Once you have the `de_sents.txt` and `en_sents.txt` as our unlabeled set, we can start out co-training process.
+
+
+## Steps
+1. Execute the co-training script to get `extended labeled set`, which will be later used to extend the original labeled set.
+```
+# You may need to decide the value of co-training params.
+python run_cotrain.py --ext_output_dir ext_data --modelA_dir baseline_model --modelB_dir onto_model --de_unlabel_dir machine_translation/2017_de_sents.txt --en_unlabel_dir machine_translation/2017_en_sents.txt --k 10 --u 10 --top_n 3 --save_preds --save_agree
+```
+2. Execute the `run_ner.py` script to train the ext model again, with `extent_L` args enabled, which will take you to retrain the model with new extended labeled set.
+```
+python run_ner.py --data_dir data/full-isw-release.tsv --bert_model bert-base-german-cased --output_dir baseline_model/ --max_seq_length 128 --do_train --extend_L --ext_data_dir ext_data --ext_output_dir ext_isw_model
+```
+3. Evaluate the new model as we did before but enable `extend_L`
+```
+python run_ner.py --data_dir data/full-isw-release.tsv --output_dir baseline_model/ --max_seq_length 128 --do_eval --eval_on test --extend_L --ext_output_dir ext_isw_model
+```
 
 
 # Simple API

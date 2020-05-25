@@ -56,15 +56,33 @@ class Ner(BertForTokenClassification):
         else:
             return logits
 
-def load_train_data(data_dir):
+def load_train_data(data_dir, ext_data_dir:str, output_dir:str, extend_L=False):
+    if extend_L:
+        with open('{}/cotrain_config.json'.format(ext_data_dir)) as f:
+            config = json.load(f)
+        prefix = config['Prefix']
+
     if "isw" in str(data_dir):
         dataset = "isw"
         logger.info("***** Loading ISW data *****")
-        # Only do train/dev/test split on ISW dataset
-        label_list, num_labels = split_data(data_dir=data_dir)
+        # Only do train/dev/test split on ISW dataset, Do only the very first time...!
+        if extend_L:
+            with open('{}/model_config.json'.format(output_dir)) as f:
+                config = json.load(f)
+            label_list = [label for label in config['label_map'].values()]
+            num_labels = config['num_labels']
+        else:
+            label_list, num_labels = split_data(data_dir=data_dir)
         # Load ISW train data
         sentences = joblib.load('data/train-{}-sentences.pkl'.format(dataset))
         labels = joblib.load('data/train-{}-labels.pkl'.format(dataset))
+        logger.info("Origin de L size: %d ", len(sentences))
+        if extend_L:
+            ext_L_A_sents = joblib.load('{}/{}_ext_L_A_sents.pkl'.format(ext_data_dir, prefix))
+            ext_L_A_labels = joblib.load('{}/{}_ext_L_A_labels.pkl'.format(ext_data_dir, prefix))
+            sentences = sentences + ext_L_A_sents
+            labels = labels + ext_L_A_labels
+            logger.info("Ext de L_ size: + {} = {}".format(len(ext_L_A_sents), len(sentences)))
     elif "onto" in str(data_dir):
         dataset = "onto"
         logger.info("***** Loading OntoNote 5.0 train data *****")
@@ -74,6 +92,13 @@ def load_train_data(data_dir):
         # Load Onto train data
         sentences = pre.sentences
         labels = pre.labels
+        logger.info("Origin en L size: %d", len(sentences))
+        if extend_L:
+            ext_L_B_sents = joblib.load('{}/{}_ext_L_B_sents.pkl'.format(ext_data_dir, prefix))
+            ext_L_B_labels = joblib.load('{}/{}_ext_L_B_labels.pkl'.format(ext_data_dir, prefix))
+            sentences = sentences + ext_L_B_sents
+            labels = labels + ext_L_B_labels
+            logger.info("Ext en L_ size: + {} = {}".format(len(ext_L_B_sents), len(sentences)))
 
     return label_list, num_labels, sentences, labels
 
@@ -115,6 +140,17 @@ def main():
     parser.add_argument("--do_train",
                         action='store_true',
                         help="Whether to run training.")
+    parser.add_argument("--extend_L",
+                        action='store_true',
+                        help="Whether to extend the train set after co-training.")
+    parser.add_argument("--ext_data_dir",
+                        default='',
+                        type=str,
+                        help="The data directory where the extended dataset is saved.")
+    parser.add_argument("--ext_output_dir",
+                        default='ext_model',
+                        type=str,
+                        help="The output directory where the extended model is saved.")
     parser.add_argument("--do_eval",
                         action='store_true',
                         help="Whether to run eval or not.")
@@ -204,16 +240,22 @@ def main():
     if not args.do_train and not args.do_eval:
         raise ValueError("At least one of `do_train` or `do_eval` must be True.")
 
-    if os.path.exists(args.output_dir) and os.listdir(args.output_dir) and args.do_train:
+    if os.path.exists(args.output_dir) and os.listdir(args.output_dir) and args.do_train and not args.extend_L:
         raise ValueError("Output directory ({}) already exists and is not empty.".format(args.output_dir))
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)
+
+    if args.extend_L:
+        if os.path.exists(args.ext_output_dir) and os.listdir(args.ext_output_dir) and args.do_train:
+            raise ValueError("Output directory ({}) already exists and is not empty.".format(args.ext_output_dir))
+        if not os.path.exists(args.ext_output_dir):
+            os.makedirs(args.ext_output_dir)
 
     task_name = args.task_name.lower()
 
     num_train_optimization_steps = 0
     if args.do_train:
-        label_list, num_labels, sentences, labels = load_train_data(data_dir=args.data_dir)
+        label_list, num_labels, sentences, labels = load_train_data(data_dir=args.data_dir, extend_L=args.extend_L, ext_data_dir=args.ext_data_dir, output_dir=args.output_dir)
 
         tokenizer = BertTokenizer.from_pretrained(args.bert_model, do_lower_case=args.do_lower_case)
         # train_examples = processor.get_train_examples(args.data_dir)
@@ -314,8 +356,14 @@ def main():
 
         # Save a trained model and the associated configuration
         model_to_save = model.module if hasattr(model, 'module') else model  # Only save the model it-self
-        model_to_save.save_pretrained(args.output_dir)
-        tokenizer.save_pretrained(args.output_dir)
+        if args.extend_L:
+            output_dir = args.ext_output_dir
+        else:
+            output_dir = args.output_dir
+
+        model_to_save.save_pretrained(output_dir)
+        tokenizer.save_pretrained(output_dir)
+
         label_map = {i : label for i, label in enumerate(label_list,1)}
         model_config = {
             "bert_model":args.bert_model,
@@ -327,21 +375,31 @@ def main():
             "adam_epsilon":args.adam_epsilon,
             "max_grad_norm":args.max_grad_norm,
             "max_seq_length":args.max_seq_length,
-            "output_dir":args.output_dir,
+            "output_dir":output_dir,
             "seed":args.seed,
             "gradient_accumulation_steps":args.gradient_accumulation_steps,
             "num_labels":len(label_list)+1,"label_map":label_map
             }
-        json.dump(model_config,open(os.path.join(args.output_dir,"model_config.json"),"w"))
+        json.dump(model_config,open(os.path.join(output_dir,"model_config.json"),"w"))
     else:
         # Load a trained model and vocabulary that you have fine-tuned
-        model = Ner.from_pretrained(args.output_dir)
-        tokenizer = BertTokenizer.from_pretrained(args.output_dir, do_lower_case=args.do_lower_case)
+        if args.extend_L:
+            model = Ner.from_pretrained(args.ext_output_dir)
+            tokenizer = BertTokenizer.from_pretrained(args.ext_output_dir, do_lower_case=args.do_lower_case)
+        else:
+            model = Ner.from_pretrained(args.output_dir)
+            tokenizer = BertTokenizer.from_pretrained(args.output_dir, do_lower_case=args.do_lower_case)
 
     model.to(device)
 
     if args.do_eval and (args.local_rank == -1 or torch.distributed.get_rank() == 0):
-        with open('{}/model_config.json'.format(args.output_dir)) as f:
+        # If we want to eval the ext model, save the eval result to the ext_model dir..
+        if args.extend_L:
+            output_dir = args.ext_output_dir
+        else:
+            output_dir = args.output_dir
+        
+        with open('{}/model_config.json'.format(output_dir)) as f:
             config = json.load(f)
         label_list = [label for label in config['label_map'].values()]
 
@@ -431,9 +489,9 @@ def main():
         
         report = classification_report(y_true, y_pred, digits=4)
         logger.info("\n%s", report)
-        output_eval_file = os.path.join(args.output_dir, "{}_results.txt".format(args.eval_on))
+        output_eval_file = os.path.join(output_dir, "{}_results.txt".format(args.eval_on))
         with open(output_eval_file, "w") as writer:
-            logger.info("***** Save the results to {}: {}_results.txt *****".format(args.output_dir, args.eval_on))
+            logger.info("***** Save the results to {}: {}_results.txt *****".format(output_dir, args.eval_on))
             writer.write(report)
 
 
