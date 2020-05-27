@@ -101,7 +101,7 @@ class CoTraining:
 		
 		if save_preds:
 			labeded_file = os.path.join(model_dir, "labeled_results.txt")
-			with open(labeded_file, "w") as writer:
+			with open(labeded_file, "w", encoding="utf-8") as writer:
 				for (i, sentence, label, avg_cfd_score) in top_n_preds:
 					writer.write(str(i)+'\n')
 					writer.write(str(sentence)+'\n')
@@ -186,7 +186,7 @@ class CoTraining:
 		
 		if save_preds:
 			labeded_file = os.path.join(model_dir, "labeled_results.txt")
-			with open(labeded_file, "w") as writer:
+			with open(labeded_file, "w", encoding="utf-8") as writer:
 				for i, feature in enumerate(features):
 					writer.write(str(feature.index)+'\n')
 					writer.write(str(feature.sentence)+'\n')
@@ -273,7 +273,7 @@ class CoTraining:
 		assert len(ext_L_A_sents) == len(ext_L_B_sents)
 
 		if save_agree:
-			with open("agree_results.txt", "w") as writer:
+			with open("agree_results.txt", "w", encoding="utf-8") as writer:
 				for feature in compare_list:
 					A_i, A_sent, A_label, A_cfd_score, B_sent, B_label, B_cfd_score, cos_score = feature
 					writer.write(str(A_i)+'\n')

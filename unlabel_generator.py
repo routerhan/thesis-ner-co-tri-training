@@ -58,7 +58,7 @@ def main():
 
     # Save to machine translation dir as txt file
     s = joblib.load('unlabel_sentences/{}_sentences.pkl'.format(args.year_data_dir))
-    with open("machine_translation/{}_de_sents.txt".format(args.year_data_dir), "w") as writer:
+    with open("machine_translation/{}_de_sents.txt".format(args.year_data_dir), "w", encoding="utf-8") as writer:
         for sent in s:
             writer.write(str(sent)+'\n')
     writer.close()
