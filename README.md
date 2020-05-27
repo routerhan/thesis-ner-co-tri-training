@@ -266,7 +266,7 @@ avg / total     0.8287    0.8545    0.8410     12585
 # Co-Training method
 Co-training algorithm is considered as bootstrap method to boost the amount of labeled set from unlabeled set. 
 
-To apply this method to our project, you could do the following:
+To apply this method to our project, you should do the following:
 
 ## Prerequisite
 1. Make sure you have two model trained. i.e. ISW and Onto models.

@@ -135,7 +135,7 @@ class CoTraining:
 		
 		# Get agree preds between two models: identical check and confident_score
 		
-		compare_agree_list, ext_L_A_sents, ext_L_A_labels, ext_L_B_sents, ext_L_B_labels = self.get_agree_preds(predA=top_A, predB=top_B, save_agree=True)
+		compare_agree_list, ext_L_A_sents, ext_L_A_labels, ext_L_B_sents, ext_L_B_labels = self.get_agree_preds(predA=top_A, predB=top_B, save_agree=True, ext_output_dir=ext_output_dir)
 
 		joblib.dump(ext_L_A_sents,'{}/{}_ext_L_A_sents.pkl'.format(ext_output_dir, len(ext_L_A_sents)))
 		logger.info("Save ext de sentences, length:{}".format(len(ext_L_A_sents)))
@@ -213,7 +213,7 @@ class CoTraining:
 		# For each match, look-up corresponding value in dictionary
 		return regex.sub(lambda mo: dict[mo.string[mo.start():mo.end()]], text)
 
-	def get_agree_preds(self, predA, predB, save_agree=False, ignore_O=True):
+	def get_agree_preds(self, predA, predB, save_agree=False, ignore_O=True, ext_output_dir=""):
 		"""
 		return : a tuple both-agreed confident predicted data from predA and predB.
 		-both-agreed -> cosine similarity score, for multi-labels comparison.
@@ -273,7 +273,7 @@ class CoTraining:
 		assert len(ext_L_A_sents) == len(ext_L_B_sents)
 
 		if save_agree:
-			with open("agree_results.txt", "w", encoding="utf-8") as writer:
+			with open("{}/agree_results.txt".format(ext_output_dir), "w", encoding="utf-8") as writer:
 				for feature in compare_list:
 					A_i, A_sent, A_label, A_cfd_score, B_sent, B_label, B_cfd_score, cos_score = feature
 					writer.write(str(A_i)+'\n')
