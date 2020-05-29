@@ -232,7 +232,7 @@ class CoTraining:
 		A_id_list = [i for (i, _, _, _)in predA ]
 		B_id_list = [i for (i, _, _, _)in predB ]
 		mutual_sent_ids = set(A_id_list) & set(B_id_list)
-		print("mutual_sent_ids", sorted(mutual_sent_ids))
+		# print("mutual_sent_ids", sorted(mutual_sent_ids))
 
 		mutual_A = sorted([pred for pred in predA if pred[0] in mutual_sent_ids], key=lambda tup: tup[0], reverse=False)
 		mutual_B = sorted([pred for pred in predB if pred[0] in mutual_sent_ids], key=lambda tup: tup[0], reverse=False)
@@ -268,7 +268,7 @@ class CoTraining:
 				compare_list.append((A_i, A_sent, A_label, A_score, B_sent, B_label, B_score, cos_score))
 			else:
 				pass
-		print("agree_sent_ids", [i for (i, *tail) in compare_list ])
+		# print("agree_sent_ids", [i for (i, *tail) in compare_list ])
 		# Number of extended sents should be the same as two models
 		assert len(ext_L_A_sents) == len(ext_L_B_sents)
 

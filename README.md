@@ -275,6 +275,7 @@ python run_ner.py --data_dir data/full-isw-release.tsv --bert_model bert-base-ge
 
 python run_ner.py --data_dir ../OntoNotes-5.0-NER-BIO/onto.train.ner --bert_model bert-base-uncased --output_dir onto_model/ --max_seq_length 128 --do_train --do_lower_case
 ```
+
 2. Get cross-lingual training features. i.e. Unlabled set with in German and English version, where we get these by introducing machine translation tools.
 
 * First you need to follow the steps of machine_translation/README.md.
@@ -283,18 +284,79 @@ python run_ner.py --data_dir ../OntoNotes-5.0-NER-BIO/onto.train.ner --bert_mode
 
 ## Steps
 1. Execute the co-training script to get `extended labeled set`, which will be later used to extend the original labeled set.
+* You may need to decide the value of co-training params.
+
+| Environment Variable| Default| Description|
+|---------------------|--------|------------|
+| `ext_output_dir`  | ext_data/ |The dir that you save the extended L set. |
+| `modelA_dir` | baseline_model/ |The dir of pre-trained model that will be used in the cotraining algorithm on the X1 feature set, e.g. German.|
+| `modelB_dir` | onto_model/ |The dir of another pre-trained model can be specified to be used on the X2 feature set, e.g. English.|
+|`de_unlabel_dir`| machine_translation/2017_de_sents.txt |The dir of unlabeled sentences in German.|
+|`en_unlabel_dir`| machine_translation/2017_en_sents.txt |The dir of unlabeled sentences in English.|
+|`top_n`|5|The number of the most confident examples that will be 'labeled' by each classifier during each iteration.|
+|`k`|30|The number of iterations.|
+|`u`|75|The size of the pool of unlabeled samples from which the classifier can choose.|
 ```
-# You may need to decide the value of co-training params.
 python run_cotrain.py --ext_output_dir ext_data --modelA_dir baseline_model --modelB_dir onto_model --de_unlabel_dir machine_translation/2017_de_sents.txt --en_unlabel_dir machine_translation/2017_en_sents.txt --k 10 --u 10 --top_n 3 --save_preds --save_agree
 ```
+The output of this script would be a `ext_data/` directory.
+```
+ext_data_1000/
+  ├── 1521_ext_L_A_labels.pkl
+  ├── 1521_ext_L_A_sents.pkl
+  ├── 1521_ext_L_B_labels.pkl
+  ├── 1521_ext_L_B_sents.pkl
+  ├── agree_results.txt
+  └── cotrain_config.json
+```
+cotrain_config
+```
+{
+  "ext_output_dir": "ext_data_1000", 
+  "Approach": "Cross-lingual Co-training", 
+  "Model A de": "baseline_model", 
+  "Model B en": "onto_model", 
+  "Pool value u": 100, 
+  "Confident top_n": 10, 
+  "Iteration k": 1000, 
+  "Agree threshold cos_score": 0.7, 
+  "Ext number of L_": 1521, 
+  "Prefix": 1521
+}
+```
+Examples: agree_results that pass the `identity check` and `confident threshold`, for sequence labeling task. i.e. NER
+```
+sent_id : 248969
+
+['Ja', 'Ich', 'war', 'hier', '1989', 'tätig', 'als', 'Catlin', 'das', 'absolute', 'Sagen', 'hatte']	
+['O', 'O', 'O', 'O', 'B-DATE', 'O', 'O', 'B-PER', 'O', 'O', 'O', 'O']	
+avg_cfd_score: 0.9936
+
+['i', 'mean', 'yes', 'in', '1989', 'i', 'was', 'here', 'to', 'say', 'absolute']	
+['O', 'O', 'O', 'O', 'B-DATE', 'O', 'O', 'O', 'O', 'O', 'O']	
+avg_cfd_score: 0.918
+
+cos_score : 0.7071
+```
+
 2. Execute the `run_ner.py` script to train the ext model again, with `extent_L` args enabled, which will take you to retrain the model with new extended labeled set.
 ```
 python run_ner.py --data_dir data/full-isw-release.tsv --bert_model bert-base-german-cased --output_dir baseline_model/ --max_seq_length 128 --do_train --extend_L --ext_data_dir ext_data --ext_output_dir ext_isw_model
 ```
+
+With enabling flag `--extend_L`, you will see the train data is extended
+```
+- INFO - __main__ -   ***** Loading ISW data *****
+- INFO - __main__ -   Origin de L size: 11258
+- INFO - __main__ -   Ext de L_ size: + 1521 = 12779
+...
+```
+
 3. Evaluate the new model as we did before but enable `extend_L`
 ```
 python run_ner.py --data_dir data/full-isw-release.tsv --output_dir baseline_model/ --max_seq_length 128 --do_eval --eval_on test --extend_L --ext_output_dir ext_isw_model
 ```
+* the ext_model will be saved in the directory `--ext_output_dir`
 
 
 # Simple API

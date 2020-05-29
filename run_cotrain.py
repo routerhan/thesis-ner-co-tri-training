@@ -11,7 +11,8 @@ logger = logging.getLogger(__name__)
 
 def main():
     # python run_cotrain.py --ext_output_dir ext_data --modelA_dir baseline_model --modelB_dir onto_model --de_unlabel_dir machine_translation/2017_de_sents.txt --en_unlabel_dir machine_translation/2017_en_sents.txt --k 10 --u 10 --top_n 3 --save_preds --save_agree
-
+    # python run_cotrain.py --ext_output_dir ext_data_1000 --modelA_dir baseline_model --modelB_dir onto_model --de_unlabel_dir machine_translation/2017_de_sents.txt --en_unlabel_dir machine_translation/2017_en_sents.txt --k 1000 --u 100 --top_n 10 --save_preds --save_agree
+    #python run_ner.py --data_dir data/full-isw-release.tsv --bert_model bert-base-german-cased --output_dir baseline_model/ --max_seq_length 128 --do_train --extend_L --ext_data_dir ext_data_1000 --ext_output_dir ext_isw_model
     parser = argparse.ArgumentParser()
 
     ## Required parameters
