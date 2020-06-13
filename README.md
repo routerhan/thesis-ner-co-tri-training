@@ -51,81 +51,42 @@ The task is focusing on `semi-supervised learning`, therefore there are a small 
 
 
 ```
-- INFO - __main__ -   ***** Running evaluation: dev *****
-- INFO - __main__ -     Num examples = 3217
-- INFO - __main__ -     Batch size = 8
-
-             precision    recall  f1-score   support
-
-        ORG     0.6471    0.6667    0.6567        66
-        PER     0.8211    0.8715    0.8455       179
-   CARDINAL     0.8652    0.8280    0.8462        93
-        GPE     0.9642    0.9706    0.9674       749
-        DUR     0.6942    0.6844    0.6893       282
-       FREQ     0.7838    0.8056    0.7945       108
-        LAN     0.9432    0.9555    0.9493       382
-       DATE     0.7750    0.7561    0.7654       246
-        NRP     0.9226    0.9189    0.9207       493
-        LOC     0.7674    0.7500    0.7586        44
-        AGE     0.6444    0.5743    0.6073       101
-       TIME     0.8556    0.9163    0.8849       705
-       RATE     0.0000    0.0000    0.0000         3
-        FAC     0.6716    0.7759    0.7200        58
-      TITLE     0.8235    0.8235    0.8235        17
-        EVT     0.9143    0.7805    0.8421        41
-       SORD     0.7273    0.7111    0.7191        45
-    ORDINAL     0.8750    0.8235    0.8485        85
-        ART     0.4545    0.2778    0.3448        18
-       MISC     0.7500    0.6667    0.7059        27
-        MON     0.6667    0.6667    0.6667         9
-       FRAC     0.4000    0.5000    0.4444         4
-       PERC     1.0000    1.0000    1.0000         8
-        MED     0.0000    0.0000    0.0000         1
-      QUANT     0.7143    0.6250    0.6667         8
-    PRODUCT     0.0000    0.0000    0.0000         7
-        ADD     0.0000    0.0000    0.0000         1
-       PROJ     1.0000    1.0000    1.0000         2
-        LAW     1.0000    1.0000    1.0000         1
-
-avg / total     0.8541    0.8631    0.8580      3783
-
-- INFO - __main__ -   ***** Save the results to baseline_model/: dev_results.txt *****
-```
-
-```
 - INFO - __main__ -   ***** Running evaluation: test *****
-- INFO - __main__ -     Num examples = 1609
-- INFO - __main__ -     Batch size = 8
 
-             precision    recall  f1-score   support
+           precision    recall  f1-score   support
 
-       DATE     0.7757    0.7830    0.7793       106
-       TIME     0.8685    0.8955    0.8818       354
-        NRP     0.9225    0.9049    0.9136       263
-   CARDINAL     0.8364    0.7667    0.8000        60
-        GPE     0.9675    0.9808    0.9741       364
-        LOC     0.5714    0.4000    0.4706        10
-        PER     0.8462    0.9462    0.8934        93
-        LAN     0.9263    0.9670    0.9462       182
-        ORG     0.7812    0.7143    0.7463        35
-        DUR     0.6639    0.5786    0.6183       140
-        AGE     0.7027    0.6341    0.6667        41
-       FREQ     0.7451    0.8636    0.8000        44
-        EVT     0.8750    0.7778    0.8235        18
-      TITLE     1.0000    1.0000    1.0000        14
-       SORD     0.8438    0.7500    0.7941        36
-    ORDINAL     0.7143    0.8333    0.7692        36
-       MISC     0.8182    0.5294    0.6429        17
-       PERC     1.0000    0.3333    0.5000         3
-        FAC     0.8333    0.9091    0.8696        22
-        ART     0.3636    0.3636    0.3636        11
-        MON     1.0000    1.0000    1.0000        10
-       RATE     0.0000    0.0000    0.0000         1
-      QUANT     1.0000    1.0000    1.0000         2
-    PRODUCT     0.0000    0.0000    0.0000         2
-       PROJ     0.0000    0.0000    0.0000         1
+      LAN     0.9376    0.9592    0.9483       564
+     TIME     0.8598    0.9093    0.8839      1059
+     DATE     0.7752    0.7642    0.7697       352
+      DUR     0.6850    0.6493    0.6667       422
+      GPE     0.9653    0.9739    0.9696      1113
+      AGE     0.6614    0.5915    0.6245       142
+      PER     0.8299    0.8971    0.8622       272
+      NRP     0.9226    0.9140    0.9183       756
+  ORDINAL     0.8197    0.8264    0.8230       121
+      EVT     0.9020    0.7797    0.8364        59
+ CARDINAL     0.8542    0.8039    0.8283       153
+     PROJ     1.0000    0.6667    0.8000         3
+      FAC     0.7143    0.8125    0.7602        80
+      LOC     0.7400    0.6852    0.7115        54
+     FREQ     0.7716    0.8224    0.7962       152
+     FRAC     0.4000    0.5000    0.4444         4
+     MISC     0.7714    0.6136    0.6835        44
+      ORG     0.6900    0.6832    0.6866       101
+      ART     0.4091    0.3103    0.3529        29
+     SORD     0.7763    0.7284    0.7516        81
+    TITLE     0.9032    0.9032    0.9032        31
+      MON     0.8421    0.8421    0.8421        19
+     RATE     0.0000    0.0000    0.0000         4
+  PRODUCT     0.0000    0.0000    0.0000         9
+    QUANT     0.7778    0.7000    0.7368        10
+     PERC     1.0000    0.8182    0.9000        11
+      ADD     0.0000    0.0000    0.0000         1
+      MED     0.0000    0.0000    0.0000         1
+      LAW     1.0000    1.0000    1.0000         1
 
-avg / total     0.8614    0.8633    0.8609      1865
+micro avg     0.8587    0.8631    0.8609      5648
+macro avg     0.8564    0.8631    0.8592      5648
 
 - INFO - __main__ -   ***** Save the results to baseline_model/: test_results.txt *****
 ```
@@ -297,11 +258,11 @@ python run_ner.py --data_dir ../OntoNotes-5.0-NER-BIO/onto.train.ner --bert_mode
 |`k`|30|The number of iterations.|
 |`u`|75|The size of the pool of unlabeled samples from which the classifier can choose.|
 ```
-python run_cotrain.py --ext_output_dir ext_data --modelA_dir baseline_model --modelB_dir onto_model --de_unlabel_dir machine_translation/2017_de_sents.txt --en_unlabel_dir machine_translation/2017_en_sents.txt --k 10 --u 10 --top_n 3 --save_preds --save_agree
+python run_cotrain.py --ext_output_dir ext_data/ext_data_1000_top_20 --modelA_dir baseline_model --modelB_dir onto_model --de_unlabel_dir machine_translation/2017_de_sents.txt --en_unlabel_dir machine_translation/2017_en_sents.txt --k 10 --u 10 --top_n 3 --save_preds --save_agree
 ```
-The output of this script would be a `ext_data/` directory.
+The output of this script would be a `ext_data/ext_data_1000_top_20` directory.
 ```
-ext_data_1000/
+ext_data/ext_data_1000_top_20
   ├── 1521_ext_L_A_labels.pkl
   ├── 1521_ext_L_A_sents.pkl
   ├── 1521_ext_L_B_labels.pkl
@@ -312,7 +273,7 @@ ext_data_1000/
 cotrain_config
 ```
 {
-  "ext_output_dir": "ext_data_1000", 
+  "ext_output_dir": "ext_data/ext_data_1000_top_20", 
   "Approach": "Cross-lingual Co-training", 
   "Model A de": "baseline_model", 
   "Model B en": "onto_model", 
@@ -341,7 +302,7 @@ cos_score : 0.7071
 
 2. Execute the `run_ner.py` script to train the ext model again, with `extent_L` args enabled, which will take you to retrain the model with new extended labeled set.
 ```
-python run_ner.py --data_dir data/full-isw-release.tsv --bert_model bert-base-german-cased --output_dir baseline_model/ --max_seq_length 128 --do_train --extend_L --ext_data_dir ext_data --ext_output_dir ext_isw_model
+python run_ner.py --data_dir data/full-isw-release.tsv --bert_model bert-base-german-cased --output_dir baseline_model/ --max_seq_length 128 --do_train --extend_L --ext_data_dir ext_data/ext_data_1000_top_20 --ext_output_dir co-models/ext_1521_isw_model/
 ```
 
 With enabling flag `--extend_L`, you will see the train data is extended
@@ -354,9 +315,29 @@ With enabling flag `--extend_L`, you will see the train data is extended
 
 3. Evaluate the new model as we did before but enable `extend_L`
 ```
-python run_ner.py --data_dir data/full-isw-release.tsv --output_dir baseline_model/ --max_seq_length 128 --do_eval --eval_on test --extend_L --ext_output_dir ext_isw_model
+python run_ner.py --data_dir data/full-isw-release.tsv --output_dir baseline_model/ --max_seq_length 128 --do_eval --eval_on test --extend_L --ext_output_dir co-models/ext_1521_isw_model/
 ```
 * the ext_model will be saved in the directory `--ext_output_dir`
+
+
+# Tri-Training method
+Tri-training is also a semi-supervised training method, it subsamples the labeled set and learn three initial classifiers.
+The teacher-student algorithm will be implemented here in more details.
+## Prerequisite
+1. Make sure you have save the subset of `isw-train-data` in to `s1, s2 and s3` respectively with desired proportion `r1, r2 and r3`
+```
+# r1, r2, r3, dataset are paras you should look after
+python run_tritrain.py --save_subsample --sample_dir sub_data/ --r1 0.4 --r2 0.4 --r3 0.2 --dataset isw
+```
+2. Learn initialized three classifiers with subsets respectively.
+```
+# --output_dir : the subset model dir, --do_subtrain: enable train subset, --subtrain_dir: the dir where subset data is stored
+python run_ner.py --data_dir data/full-isw-release.tsv --bert_model bert-base-german-cased --output_dir tri-models/s1_model/ --max_seq_length 128 --do_train --do_subtrain --subtrain_dir sub_data/train-isw-s1.pkl
+
+python run_ner.py --data_dir data/full-isw-release.tsv --bert_model bert-base-german-cased --output_dir tri-models/s2_model/ --max_seq_length 128 --do_train --do_subtrain --subtrain_dir sub_data/train-isw-s2.pkl
+
+python run_ner.py --data_dir data/full-isw-release.tsv --bert_model bert-base-german-cased --output_dir tri-models/s3_model/ --max_seq_length 128 --do_train --do_subtrain --subtrain_dir sub_data/train-isw-s3.pkl
+```
 
 
 # Simple API

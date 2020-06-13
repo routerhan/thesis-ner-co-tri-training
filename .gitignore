@@ -140,11 +140,10 @@ celerybeat-schedule
 
 # mkdocs documentation
 /site
-/models/*
+/co-models/*
+/tri-models/*
+/sub_data/*.pkl
 /logs/*
-/isw_model/*
-/test_model/*
-/tw_model/*
 /onto_model/*
 /model_2/*
 /data/*.pkl
