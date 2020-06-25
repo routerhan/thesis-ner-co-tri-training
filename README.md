@@ -338,6 +338,61 @@ python run_ner.py --data_dir data/full-isw-release.tsv --bert_model bert-base-ge
 
 python run_ner.py --data_dir data/full-isw-release.tsv --bert_model bert-base-german-cased --output_dir tri-models/s3_model/ --max_seq_length 128 --do_train --do_subtrain --subtrain_dir sub_data/train-isw-s3.pkl
 ```
+* Once you have 3 initial classifiers candidates for teacher-student, you may start tri-training !
+
+
+## Steps
+
+1. Execute the `run_tritrain.py`, which will assign `teacher-student roles` and also give you the `teachabel samples` as new adding labels for re-train the student model.
+
+* You may need to decide the value of teacher-student tri-training params.
+
+| Environment Variable| Default| Description|
+|---------------------|--------|------------|
+| `ext_data_dir`  | tri_ext_data/ |The dir saved the teachable samples as sents and labels pkl file. |
+| `val_on` | test |The test samples for you to validate the error rate of teacher candidates.|
+| `U` | data/dev-isw-sentences.pkl |The file of unlabeled set with the format of list of sentences.|
+|`u`| 100 | The pool value of U, to limit the amount of unlabeled samples to use.|
+|`cos_score_threshold`| 0.7 |The similarity socre threshold to check identicality of sequance labeling task.|
+|`mi_dir`| tri-models/s1_model/ |The model dir trained on subset s1.|
+|`mj_dir`| tri-models/s2_model/ |The model dir trained on subset s2.|
+|`mk_dir`| tri-models/s3_model/ |The model dir trained on subset s3.|
+|`tcfd_threshold`|0.7|The teacher confidence threshold for checking whether the sample x is teachable. i.e. teacher's cfd must both over this threshold.|
+|`scfd_threshold`|0.6|The student confidence threshold for checking whether the sample x is teachable. i.ie student's cfd must lower that the threshold.|
+|`r_t`|0.1|The addaptive rate of threshold for teacher clf after each iteration.|
+|`r_s`|0.1|The addaptive rate of threshold for student clf after each iteration.|
+```
+python run_tritrain.py --ext_data_dir tri_ext_data/u_3000 --val_on test --U data/dev-isw-sentences.pkl --u 3000 --mi_dir tri-models/s1_model/ --mj_dir tri-models/s2_model/ --mk_dir tri-models/s3_model/ --tcfd_threshold 0.7 --scfd_threshold 0.6 --r_t 0.1 --r_s 0.1
+```
+
+* Assign teacher-student relationship
+```
+***** Assigning teacher and student clf ***** 
+e_ij : 0.0878
+e_ik : 0.1051
+e_jk : 0.0905
+teacher models are assign to : mi, mj
+```
+
+* We use the labeled set(i.e. test|dev set) for computing the `error_rate`, which is used to determiner teacher and student roles.
+
+* Example of teachable samples
+```
+***** Picking teachable samples ***** 
+num of teachable = 108
+***** Example samples ***** 
+Sent =      Ah das ist der Herr Düringer heißt er
+t1 preds = (['O', 'O', 'O', 'O', 'B-TITLE', 'B-PER', 'O', 'O']	0.7388)
+t2 preds = (['O', 'O', 'O', 'O', 'B-TITLE', 'B-PER', 'O', 'O']	0.7675)
+s preds = (['O', 'O', 'O', 'O', 'B-PER', 'I-PER', 'O', 'O']	0.4584)
+```
+
+2. Use `teacherable samples` to extend the training data and re-train the model (i.e. student model)
+
+Execute the `run_ner.py` script to train the ext model again, with `extent_L_tri` args enabled, which will take you to retrain the model with new adding `teachable samples` set.
+```
+python run_ner.py --data_dir data/full-isw-release.tsv --max_seq_length 128 --do_train --extend_L_tri --ext_data_dir tri_ext_data/u_3000 --ext_output_dir tri-models/ext_{}_tri_model/
+```
 
 
 # Simple API
