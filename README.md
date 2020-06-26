@@ -391,7 +391,7 @@ s preds = (['O', 'O', 'O', 'O', 'B-PER', 'I-PER', 'O', 'O']	0.4584)
 
 Execute the `run_ner.py` script to train the ext model again, with `extent_L_tri` args enabled, which will take you to retrain the model with new adding `teachable samples` set.
 ```
-python run_ner.py --data_dir data/full-isw-release.tsv --max_seq_length 128 --do_train --extend_L_tri --ext_data_dir tri_ext_data/u_3000 --ext_output_dir tri-models/ext_{}_tri_model/
+python run_ner.py --max_seq_length 128 --do_train --do_subtrain --subtrain_dir sub_data/train-isw-s3.pkl --extend_L_tri --ext_data_dir tri_ext_data/u_3000 --ext_output_dir tri-models/ext_108_tri_model/
 ```
 
 

@@ -56,11 +56,15 @@ class Ner(BertForTokenClassification):
         else:
             return logits
 
-def load_train_data(data_dir, ext_data_dir:str, output_dir:str, extend_L=False):
+def load_train_data(data_dir, ext_data_dir:str, output_dir:str, extend_L=False, extend_L_tri=False):
     if extend_L:
         with open('{}/cotrain_config.json'.format(ext_data_dir)) as f:
             config = json.load(f)
         prefix = config['Prefix']
+    # if extend_L_tri:
+    #     with open('{}/tri_config.json'.format(ext_data_dir)) as f:
+    #         config = json.load(f)
+    #     prefix = config['Prefix']
 
     if "isw" in str(data_dir):
         dataset = "isw"
@@ -82,7 +86,15 @@ def load_train_data(data_dir, ext_data_dir:str, output_dir:str, extend_L=False):
             ext_L_A_labels = joblib.load('{}/{}_ext_L_A_labels.pkl'.format(ext_data_dir, prefix))
             sentences = sentences + ext_L_A_sents
             labels = labels + ext_L_A_labels
-            logger.info("Ext de L_ size: + {} = {}".format(len(ext_L_A_sents), len(sentences)))
+            logger.info("---Co-training---: Ext de L_ size: + {} = {}".format(len(ext_L_A_sents), len(sentences)))
+        # if extend_L_tri:
+        #     tri_ext_sents = joblib.load('{}/{}_ext_sents.pkl'.format(ext_data_dir, prefix))
+        #     tri_ext_labels = joblib.load('{}/{}_ext_labels.pkl'.format(ext_data_dir, prefix))
+        #     sentences = sentences + tri_ext_sents
+        #     labels = labels + tri_ext_labels
+        #     # TODO : 1. ISW + teachable of S1 subeset + teachable
+        #     logger.info("---Tri-training---: Ext teachable L_ size: + {} = {}".format(len(tri_ext_sents), len(sentences)))
+
     elif "onto" in str(data_dir):
         dataset = "onto"
         logger.info("***** Loading OntoNote 5.0 train data *****")
@@ -255,9 +267,9 @@ def main():
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)
 
-    if args.extend_L:
+    if args.extend_L or args.extend_L_tri:
         if os.path.exists(args.ext_output_dir) and os.listdir(args.ext_output_dir) and args.do_train:
-            raise ValueError("Output directory ({}) already exists and is not empty.".format(args.ext_output_dir))
+            raise ValueError("Ext model output directory ({}) already exists and is not empty.".format(args.ext_output_dir))
         if not os.path.exists(args.ext_output_dir):
             os.makedirs(args.ext_output_dir)
 
