@@ -109,3 +109,25 @@ def get_hyperparameters(model, ff):
         optimizer_grouped_parameters = [{"params": [p for n, p in param_optimizer]}]
 
     return optimizer_grouped_parameters
+
+def random_subsample(r1=0.4, r2=0.4, r3=0.2, dataset="isw"):
+    """
+    Return : [("Ich bin 12", ['O', 'O', 'QUANT']), (), ...]
+    """
+    sents = joblib.load('data/train-{}-sentences.pkl'.format(dataset))
+    labels = joblib.load('data/train-{}-labels.pkl'.format(dataset))
+    # Zip the sents and its tags
+    train_set = []
+    for sent, label in zip(sents, labels):
+        train_set.append((sent, label))
+    assert len(train_set) == len(sents)
+
+    len_s1 = int(len(train_set)*r1)
+    len_s2 = int(len(train_set)*r2)
+
+    s1 = train_set[:len_s1]
+    s2 = train_set[len_s1:len_s1+len_s2]
+    s3 = train_set[len_s1+len_s2:]
+    assert len(s1) + len(s2) + len(s3) == len(train_set)
+    return s1, s2, s3
+

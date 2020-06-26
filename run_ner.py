@@ -140,9 +140,19 @@ def main():
     parser.add_argument("--do_train",
                         action='store_true',
                         help="Whether to run training.")
+    # python run_ner.py --data_dir data/full-isw-release.tsv --bert_model bert-base-german-cased --output_dir tri-models/s1_model/ --max_seq_length 128 --do_train --do_subtrain --subtrain_dir sub_data/train-isw-s1.pkl
+    parser.add_argument("--do_subtrain",
+                        action='store_true',
+                        help="Whether to run subtrain on s1, s2 or s3.")
+    parser.add_argument("--subtrain_dir",
+                        default="sub_data/train-isw-s1.pkl",
+                        help="Dir to run sub-training on the s1, s2 or s3 set.")
     parser.add_argument("--extend_L",
                         action='store_true',
                         help="Whether to extend the train set after co-training.")
+    parser.add_argument("--extend_L_tri",
+                        action='store_true',
+                        help="Whether to extend the train set after tri-training.")
     parser.add_argument("--ext_data_dir",
                         default='',
                         type=str,
@@ -256,6 +266,25 @@ def main():
     num_train_optimization_steps = 0
     if args.do_train:
         label_list, num_labels, sentences, labels = load_train_data(data_dir=args.data_dir, extend_L=args.extend_L, ext_data_dir=args.ext_data_dir, output_dir=args.output_dir)
+
+        # check if do subset training : s1, s2, s3...
+        if args.do_subtrain:
+            s = joblib.load(args.subtrain_dir)
+            sentences = [sent for (sent, label) in s]
+            labels = [label for (sent, label) in s]
+
+            if args.extend_L_tri:
+                with open('{}/tri_config.json'.format(args.ext_data_dir)) as f:
+                    config = json.load(f)
+                prefix = config['Prefix']
+
+                logger.info("Origin Student {} L size: {} ".format(args.subtrain_dir,len(sentences)))
+                tri_ext_sents = joblib.load('{}/{}_ext_sents.pkl'.format(args.ext_data_dir, prefix))
+                tri_ext_labels = joblib.load('{}/{}_ext_labels.pkl'.format(args.ext_data_dir, prefix))
+                sentences = sentences + tri_ext_sents
+                labels = labels + tri_ext_labels
+                # TODO : 1. ISW + teachable of S1 subeset + teachable
+                logger.info("---Tri-training---: Ext teachable L_ size: + {} = {}".format(len(tri_ext_sents), len(sentences)))
 
         tokenizer = BertTokenizer.from_pretrained(args.bert_model, do_lower_case=args.do_lower_case)
         # train_examples = processor.get_train_examples(args.data_dir)
