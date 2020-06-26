@@ -35,13 +35,13 @@ def split_data(data_dir='data/full-isw-release.tsv'):
         logger.info("  Num train = %d", len(X_train))
         logger.info("  Num dev = %d", len(X_val))
         logger.info("  Num test = %d", len(X_test))
-        logger.info("***** Save as pkl in /data *****")
-        joblib.dump(X_train,'data/train-{}-sentences.pkl'.format(dataset))
-        joblib.dump(y_train,'data/train-{}-labels.pkl'.format(dataset))
-        joblib.dump(X_test,'data/test-{}-sentences.pkl'.format(dataset))
-        joblib.dump(y_test,'data/test-{}-labels.pkl'.format(dataset))
-        joblib.dump(X_val,'data/dev-{}-sentences.pkl'.format(dataset))
-        joblib.dump(y_val,'data/dev-{}-labels.pkl'.format(dataset))
+        # logger.info("***** Save as pkl in /data *****")
+        # joblib.dump(X_train,'data/train-{}-sentences.pkl'.format(dataset))
+        # joblib.dump(y_train,'data/train-{}-labels.pkl'.format(dataset))
+        # joblib.dump(X_test,'data/test-{}-sentences.pkl'.format(dataset))
+        # joblib.dump(y_test,'data/test-{}-labels.pkl'.format(dataset))
+        # joblib.dump(X_val,'data/dev-{}-sentences.pkl'.format(dataset))
+        # joblib.dump(y_val,'data/dev-{}-labels.pkl'.format(dataset))
 
     return label_list, num_labels
 

@@ -105,11 +105,11 @@ def load_train_data(data_dir, ext_data_dir:str, output_dir:str, extend_L=False):
 def main():
     parser = argparse.ArgumentParser()
 
-    ## Required parameters
+    ## Main parameters
     parser.add_argument("--data_dir",
                         default='data/full-isw-release.tsv',
                         type=str,
-                        required=True,
+                        required=False,
                         help="The input data dir. Should contain the .tsv files (or other data files) for the task.")
     parser.add_argument("--bert_model", default="bert-base-german-cased", type=str, required=False,
                         help="Bert pre-trained model selected in the list: bert-base-uncased, "
@@ -123,7 +123,7 @@ def main():
     parser.add_argument("--output_dir",
                         default='models/',
                         type=str,
-                        required=True,
+                        required=False,
                         help="The output directory where the model predictions and checkpoints will be written.")
 
     ## Other parameters
@@ -411,8 +411,8 @@ def main():
                 eval_labels = joblib.load('data/dev-{}-labels.pkl'.format(dataset))
                 eval_label_list = label_list
             elif args.eval_on == "test":
-                eval_sentences = joblib.load('data/test-{}-sentences.pkl'.format(dataset))
-                eval_labels = joblib.load('data/test-{}-labels.pkl'.format(dataset))
+                eval_sentences = joblib.load('data/30-test-{}-sentences.pkl'.format(dataset))
+                eval_labels = joblib.load('data/30-test-{}-labels.pkl'.format(dataset))
                 eval_label_list = label_list
             else:
                 raise ValueError("eval on dev or test set only")
