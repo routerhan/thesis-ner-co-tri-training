@@ -389,7 +389,16 @@ s preds = (['O', 'O', 'O', 'O', 'B-PER', 'I-PER', 'O', 'O']	0.4584)
 
 2. Use `teacherable samples` to extend the training data and re-train the model (i.e. student model)
 
-Execute the `run_ner.py` script to train the ext model again, with `extent_L_tri` args enabled, which will take you to retrain the model with new adding `teachable samples` set.
+Execute the `run_ner.py` script to train the ext model again, with `extent_L_tri` args enabled, which will take you to retrain the model with new adding `teachable samples` set. 
+
+* You may need to decide the value of following paras in this step.
+| Environment Variable| Default| Description|
+|---------------------|--------|------------|
+| `do_subtrain`  | store_true | Enable loading the subset of train data, i.e. s1, s2 or s3|
+| `subtrain_dir` | sub_data/train-isw-s3.pkl  | we need to specify the train data of `student` (either s1, s2 or s3), decided by the `error_rate`|
+| `extend_L_tri` | store_true |Enable executing the training phrase with new adding teachable samples for `retrain` the student clf.|
+| `ext_data_dir` | tri_ext_data/u_3000 | The data dir that saved teachable samples.|
+| `ext_output_dir` | tri-models/ext_108_tri_model/ |The dir which saved the retrained student clf from ext_teachable_data.|
 ```
 python run_ner.py --max_seq_length 128 --do_train --do_subtrain --subtrain_dir sub_data/train-isw-s3.pkl --extend_L_tri --ext_data_dir tri_ext_data/u_3000 --ext_output_dir tri-models/ext_108_tri_model/
 ```
