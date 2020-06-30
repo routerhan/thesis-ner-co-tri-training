@@ -262,7 +262,7 @@ def main():
     if not args.do_train and not args.do_eval:
         raise ValueError("At least one of `do_train` or `do_eval` must be True.")
 
-    if os.path.exists(args.output_dir) and os.listdir(args.output_dir) and args.do_train and not args.extend_L:
+    if os.path.exists(args.output_dir) and os.listdir(args.output_dir) and args.do_train and not args.extend_L and not args.extend_L_tri:
         raise ValueError("Output directory ({}) already exists and is not empty.".format(args.output_dir))
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)
@@ -397,7 +397,7 @@ def main():
 
         # Save a trained model and the associated configuration
         model_to_save = model.module if hasattr(model, 'module') else model  # Only save the model it-self
-        if args.extend_L:
+        if args.extend_L or args.extend_L_tri:
             output_dir = args.ext_output_dir
         else:
             output_dir = args.output_dir
@@ -424,7 +424,7 @@ def main():
         json.dump(model_config,open(os.path.join(output_dir,"model_config.json"),"w"))
     else:
         # Load a trained model and vocabulary that you have fine-tuned
-        if args.extend_L:
+        if args.extend_L or args.extend_L_tri:
             model = Ner.from_pretrained(args.ext_output_dir)
             tokenizer = BertTokenizer.from_pretrained(args.ext_output_dir, do_lower_case=args.do_lower_case)
         else:
@@ -435,7 +435,7 @@ def main():
 
     if args.do_eval and (args.local_rank == -1 or torch.distributed.get_rank() == 0):
         # If we want to eval the ext model, save the eval result to the ext_model dir..
-        if args.extend_L:
+        if args.extend_L or args.extend_L_tri:
             output_dir = args.ext_output_dir
         else:
             output_dir = args.output_dir

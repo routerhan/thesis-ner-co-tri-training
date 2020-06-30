@@ -77,18 +77,10 @@ def main():
                         default='sub_data/',
                         type=str,
                         help="The dir that you save the sub-samples of L set.")
-    parser.add_argument("--r1",
-                        default=0.4,
+    parser.add_argument("--r",
+                        default=0.7,
                         type=float,
-                        help="The sample size of s1")
-    parser.add_argument("--r2",
-                        default=0.4,
-                        type=float,
-                        help="The sample size of s2")
-    parser.add_argument("--r3",
-                        default=0.2,
-                        type=float,
-                        help="The sample size of s3")
+                        help="The subset size of origin train set, e.g. 70 percent of the data (with replacement) for each sample.")
     parser.add_argument("--dataset",
                         default="isw",
                         type=str,
@@ -102,8 +94,8 @@ def main():
             os.makedirs(args.sample_dir)
 
         logger.info(" ***** Sub-sampling L ***** ")
-        s1, s2, s3 = utils.random_subsample(r1=args.r1, r2=args.r2, r3=args.r3, dataset=args.dataset)
-        logger.info(" Divided into : {}/{}/{}".format(args.r1, args.r2, args.r3))
+        s1, s2, s3 = utils.random_subsample_replacement(r=args.r, dataset=args.dataset)
+        logger.info(" Sampling with {} percents of origin train set:".format(args.r))
         logger.info(" S1 size = {}".format(len(s1)))
         logger.info(" S2 size = {}".format(len(s2)))
         logger.info(" S3 size = {}".format(len(s3)))
@@ -112,15 +104,15 @@ def main():
         joblib.dump(s2, '{}/train-isw-s2.pkl'.format(args.sample_dir))
         joblib.dump(s3, '{}/train-isw-s3.pkl'.format(args.sample_dir))
         logger.info(" Save into : {}".format(args.sample_dir))
-    
-    # Start tri-training
-    logger.info(" ***** Start Tri-training ***** ")
-    if not os.path.exists(args.ext_data_dir):
-        os.makedirs(args.ext_data_dir)
+    else:
+        # Start tri-training
+        logger.info(" ***** Start Tri-training ***** ")
+        if not os.path.exists(args.ext_data_dir):
+            os.makedirs(args.ext_data_dir)
 
-    # Start tri-training : save teachable samples
-    tri_train = TriTraining(ext_data_dir=args.ext_data_dir, val_on=args.val_on, U=args.U, u=args.u, mi_dir=args.mi_dir, mj_dir=args.mj_dir, mk_dir=args.mk_dir, tcfd_threshold=args.tcfd_threshold, scfd_threshold=args.scfd_threshold, r_t=args.r_t, r_s=args.r_s, cos_score_threshold=args.cos_score_threshold)
-    t1_dir, t2_dir, s_dir, e_rate, teachable_preds = tri_train.fit()
+        # Start tri-training : save teachable samples
+        tri_train = TriTraining(ext_data_dir=args.ext_data_dir, val_on=args.val_on, U=args.U, u=args.u, mi_dir=args.mi_dir, mj_dir=args.mj_dir, mk_dir=args.mk_dir, tcfd_threshold=args.tcfd_threshold, scfd_threshold=args.scfd_threshold, r_t=args.r_t, r_s=args.r_s, cos_score_threshold=args.cos_score_threshold)
+        t1_dir, t2_dir, s_dir, e_rate, teachable_preds = tri_train.fit()
 
 if __name__ == '__main__':
     main()

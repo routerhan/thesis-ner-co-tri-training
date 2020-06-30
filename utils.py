@@ -1,5 +1,6 @@
 import logging
 import joblib
+from random import choices
 from sklearn.model_selection import train_test_split
 from collections import Counter
 from preprocessor import IswPreprocessor, OntoPreprocessor
@@ -110,8 +111,9 @@ def get_hyperparameters(model, ff):
 
     return optimizer_grouped_parameters
 
-def random_subsample(r1=0.4, r2=0.4, r3=0.2, dataset="isw"):
+def random_subsample_replacement(r=0.7, dataset="isw"):
     """
+    sampling with replacement, i.e. sampling 70% origin isw-train with replacement.
     Return : [("Ich bin 12", ['O', 'O', 'QUANT']), (), ...]
     """
     sents = joblib.load('data/train-{}-sentences.pkl'.format(dataset))
@@ -122,12 +124,10 @@ def random_subsample(r1=0.4, r2=0.4, r3=0.2, dataset="isw"):
         train_set.append((sent, label))
     assert len(train_set) == len(sents)
 
-    len_s1 = int(len(train_set)*r1)
-    len_s2 = int(len(train_set)*r2)
+    len_sample = int(len(train_set)*r)
 
-    s1 = train_set[:len_s1]
-    s2 = train_set[len_s1:len_s1+len_s2]
-    s3 = train_set[len_s1+len_s2:]
-    assert len(s1) + len(s2) + len(s3) == len(train_set)
+    s1 = choices(train_set, k=len_sample)
+    s2 = choices(train_set, k=len_sample)
+    s3 = choices(train_set, k=len_sample)
     return s1, s2, s3
 

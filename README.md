@@ -324,21 +324,27 @@ python run_ner.py --data_dir data/full-isw-release.tsv --output_dir baseline_mod
 Tri-training is also a semi-supervised training method, it subsamples the labeled set and learn three initial classifiers.
 The teacher-student algorithm will be implemented here in more details.
 ## Prerequisite
-1. Make sure you have save the subset of `isw-train-data` in to `s1, s2 and s3` respectively with desired proportion `r1, r2 and r3`
+1. Make sure you have save the subset of `isw-train-data` in to `s1, s2 and s3` with replacement and desired proportion `r`
 ```
-# r1, r2, r3, dataset are paras you should look after
-python run_tritrain.py --save_subsample --sample_dir sub_data/ --r1 0.4 --r2 0.4 --r3 0.2 --dataset isw
+# r and dataset are paras you should look after
+python run_tritrain.py --save_subsample --sample_dir sub_data/ --r 0.7 --dataset isw
 ```
 2. Learn initialized three classifiers with subsets respectively.
 ```
 # --output_dir : the subset model dir, --do_subtrain: enable train subset, --subtrain_dir: the dir where subset data is stored
-python run_ner.py --data_dir data/full-isw-release.tsv --bert_model bert-base-german-cased --output_dir tri-models/s1_model/ --max_seq_length 128 --do_train --do_subtrain --subtrain_dir sub_data/train-isw-s1.pkl
 
-python run_ner.py --data_dir data/full-isw-release.tsv --bert_model bert-base-german-cased --output_dir tri-models/s2_model/ --max_seq_length 128 --do_train --do_subtrain --subtrain_dir sub_data/train-isw-s2.pkl
+python run_ner.py --output_dir tri-models/s1_model/ --max_seq_length 128 --do_train --do_subtrain --subtrain_dir sub_data/train-isw-s1.pkl
 
-python run_ner.py --data_dir data/full-isw-release.tsv --bert_model bert-base-german-cased --output_dir tri-models/s3_model/ --max_seq_length 128 --do_train --do_subtrain --subtrain_dir sub_data/train-isw-s3.pkl
+python run_ner.py --output_dir tri-models/s2_model/ --max_seq_length 128 --do_train --do_subtrain --subtrain_dir sub_data/train-isw-s2.pkl
+
+python run_ner.py --output_dir tri-models/s3_model/ --max_seq_length 128 --do_train --do_subtrain --subtrain_dir sub_data/train-isw-s3.pkl
 ```
 * Once you have 3 initial classifiers candidates for teacher-student, you may start tri-training !
+
+3. Evaluation of three candidates classifiers
+```
+python run_ner.py --data_dir data/full-isw-release.tsv --output_dir tri-models/s1_model/ --max_seq_length 128 --do_eval --eval_on test
+```
 
 
 ## Steps
