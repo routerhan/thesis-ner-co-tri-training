@@ -20,6 +20,7 @@ def main():
         # python run_ner.py --output_dir tri-models/s1_model/ --max_seq_length 128 --do_eval --eval_on test
         logger.info(" ***** Evaluate init {} classifiers ***** ".format(s))
         script = "python run_ner.py --output_dir tri-models/{}_model/ --max_seq_length 128 --do_eval --eval_on test".format(s)
+        os.system(script)
 
 
 if __name__ == '__main__':
