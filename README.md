@@ -339,6 +339,12 @@ python run_ner.py --output_dir tri-models/s2_model/ --max_seq_length 128 --do_tr
 
 python run_ner.py --output_dir tri-models/s3_model/ --max_seq_length 128 --do_train --do_subtrain --subtrain_dir sub_data/train-isw-s3.pkl
 ```
+
+* One line for `prerequisite`
+```
+python hack_tri.py
+```
+
 * Once you have 3 initial classifiers candidates for teacher-student, you may start tri-training !
 
 3. Evaluation of three candidates classifiers
@@ -368,7 +374,7 @@ python run_ner.py --data_dir data/full-isw-release.tsv --output_dir tri-models/s
 |`r_t`|0.1|The addaptive rate of threshold for teacher clf after each iteration.|
 |`r_s`|0.1|The addaptive rate of threshold for student clf after each iteration.|
 ```
-python run_tritrain.py --ext_data_dir tri_ext_data/u_3000 --val_on test --U data/dev-isw-sentences.pkl --u 3000 --mi_dir tri-models/s1_model/ --mj_dir tri-models/s2_model/ --mk_dir tri-models/s3_model/ --tcfd_threshold 0.7 --scfd_threshold 0.6 --r_t 0.1 --r_s 0.1
+python run_tritrain.py --U data/dev-isw-sentences.pkl --u 3000 --mi_dir tri-models/s1_model/ --mj_dir tri-models/s2_model/ --mk_dir tri-models/s3_model/ --tcfd_threshold 0.7 --scfd_threshold 0.6 --r_t 0.1 --r_s 0.1
 ```
 
 * Assign teacher-student relationship
@@ -395,9 +401,9 @@ s preds = (['O', 'O', 'O', 'O', 'B-PER', 'I-PER', 'O', 'O']	0.4584)
 
 2. Use `teacherable samples` to extend the training data and re-train the model (i.e. student model)
 
-Execute the `run_ner.py` script to train the ext model again, with `extent_L_tri` args enabled, which will take you to retrain the model with new adding `teachable samples` set. 
+3. Execute the `run_ner.py` script to train the ext model again, with `extent_L_tri` args enabled, which will take you to retrain the model with new adding `teachable samples` set. 
 
-* You may need to decide the value of following paras in this step.
+You may need to decide the value of following paras in this step.
 | Environment Variable| Default| Description|
 |---------------------|--------|------------|
 | `do_subtrain`  | store_true | Enable loading the subset of train data, i.e. s1, s2 or s3|
@@ -406,8 +412,14 @@ Execute the `run_ner.py` script to train the ext model again, with `extent_L_tri
 | `ext_data_dir` | tri_ext_data/u_3000 | The data dir that saved teachable samples.|
 | `ext_output_dir` | tri-models/ext_108_tri_model/ |The dir which saved the retrained student clf from ext_teachable_data.|
 ```
-python run_ner.py --max_seq_length 128 --do_train --do_subtrain --subtrain_dir sub_data/train-isw-s3.pkl --extend_L_tri --ext_data_dir tri_ext_data/u_3000 --ext_output_dir tri-models/ext_108_tri_model/
+python run_ner.py --max_seq_length 128 --do_train --do_subtrain --subtrain_dir sub_data/train-isw-s3.pkl --extend_L_tri
 ```
+
+4. Evaluate the retrained student model as we did before but enable `extend_L_tri`
+```
+python run_ner.py --max_seq_length 128 --do_eval --eval_on test --extend_L_tri --ext_output_dir tri-models/ext_108_tri_model/
+```
+* the ext_model will be saved in the directory `--ext_output_dir`
 
 
 # Simple API

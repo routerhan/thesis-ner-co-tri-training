@@ -26,10 +26,7 @@ class TriTraining:
     r_t,r_s - teacher-student adaptive rates
     """
 
-    def __init__(self, ext_data_dir, val_on, U, u, mi_dir, mj_dir, mk_dir, tcfd_threshold, scfd_threshold, r_t, r_s, cos_score_threshold):
-        self.ext_data_dir = ext_data_dir
-        # val_on: dev or test of isw data, just for checking the error rate.
-        self.val_on = val_on
+    def __init__(self, U, u, mi_dir, mj_dir, mk_dir, tcfd_threshold, scfd_threshold, r_t, r_s, cos_score_threshold):
         # U : unlabeled list of sentences
         self.U = U
         # pool value of unlabeled samples.
@@ -145,90 +142,114 @@ class TriTraining:
         """
         This function takes care of tri-training process.
         """
+        # Load unlabel set
         U = joblib.load(self.U)
-        # Get teacher and student clf
-        (t1, t1_dir), (t2, t2_dir), (s, s_dir), e_rate = self.assign_teacher_student_by_e(valid_on=self.val_on)
-        pass
-        # U_ is for classifier to choose, we take it from back
-        U_ = U[-min(len(U), self.u):]
+        # (Ner(model_dir=mi_dir), mi_dir), i.e. self.mi[0]=Ner(model_dir=mi_dir), self.mi[1]= mi_dir
+        role_rotate = [(self.mi, self.mj, self.mk), (self.mj, self.mk, self.mi), (self.mi, self.mk, self.mj)]
 
-        # Get preds and check if the sample x in U_ is teachable
-        teachable_preds=[]
-        for x in U_:
-            try:
-                compare_ts_list = []
-                for model in [t1, t2, s]:
-                    pred = model.predict(text=x)
-                    label = [dic['tag'] for dic in pred]
-                    avg_cfd_score = utils.get_avg_confident_score(pred_result=pred, ignore_O=True)
-                    compare_ts_list.append((label, avg_cfd_score))
-                t1_preds, t2_preds, s_preds = compare_ts_list
+        ext_data_s = []
+        for (t1, t2, s) in role_rotate:
 
-                # Check if x is teachable base on its prediction confident score.
-                if self.is_teachable(text=x, tm1=t1_preds, tm2=t2_preds, sm=s_preds):
-                    teachable_preds.append((x, t1_preds, t2_preds, s_preds))
-            except:
-                pass
-        
-        logger.info(" ***** Picking teachable samples ***** ")
-        logger.info(" num of teachable = {}".format(len(teachable_preds)))
-        logger.info(" ***** Example samples ***** ")
-        logger.info(" Sent = {}".format(teachable_preds[0][0]))
-        logger.info(" t1 preds = {}".format(teachable_preds[0][1]))
-        logger.info(" t2 preds = {}".format(teachable_preds[0][2]))
-        logger.info(" s preds = {}".format(teachable_preds[0][3]))
+            # U_ is for classifier to choose, we take it from back
+            U_ = U[-min(len(U), self.u):]
 
-        if self.save_teachable:
-            analysis_file = os.path.join(s_dir, "{}-analysis-samples.txt".format(len(teachable_preds)))
-            with open(analysis_file, "w", encoding="utf-8") as w:
-                for features in teachable_preds:
-                    sent, (t1_label, t1cfd), (t2_labels, t2cfd), (s_labels, scfd)=features
-                    w.write(str(sent)+'\n')
-                    w.write(str(t1_label)+'\t')
-                    w.write(str(t1cfd)+'\n')
-                    w.write(str(t2_labels)+'\t')
-                    w.write(str(t2cfd)+'\n')
-                    w.write(str(s_labels)+'\t')
-                    w.write(str(scfd)+'\n')
-                    w.write('\n')
-            w.close()
-            logger.info("Save analysis samples under student model dir: {}".format(analysis_file))
+            # Get preds and check if the sample x in U_ is teachable
+            teachable_preds=[]
+            for x in U_:
+                try:
+                    compare_ts_list = []
+                    for model in [t1[0], t2[0], s[0]]:
+                        pred = model.predict(text=x)
+                        label = [dic['tag'] for dic in pred]
+                        avg_cfd_score = utils.get_avg_confident_score(pred_result=pred, ignore_O=True)
+                        compare_ts_list.append((label, avg_cfd_score))
+                    t1_preds, t2_preds, s_preds = compare_ts_list
 
-        # Save as pkl for further training process
-        ext_sents = [sent for (sent, *args) in teachable_preds]
-        ext_labels = []
-        for (_, (t1_label, t1_cfd), (t2_label, t2_cfd),*_) in teachable_preds:
-            if t1_label==t2_label:
-                ext_labels.append(t1_label)
-            elif t1_cfd > t2_cfd:
-                ext_labels.append(t1_label)
-            else:
-                ext_labels.append(t2_label)
-        joblib.dump(ext_sents,'{}/{}_ext_sents.pkl'.format(self.ext_data_dir, len(ext_sents)))
-        joblib.dump(ext_labels,'{}/{}_ext_labels.pkl'.format(self.ext_data_dir, len(ext_labels)))
-        logger.info("Save ext teachable sentences, length:{}".format(len(ext_sents)))
-        logger.info("Save sents and labels as pkl file in dir: {}".format(self.ext_data_dir))
+                    # Check if x is teachable base on its prediction confident score.
+                    if self.is_teachable(text=x, tm1=t1_preds, tm2=t2_preds, sm=s_preds):
+                        teachable_preds.append((x, t1_preds, t2_preds, s_preds))
+                except:
+                    pass
+            
+            logger.info(" ***** Picking teachable samples ***** ")
+            logger.info(" num of teachable for {} = {}".format(s[1],len(teachable_preds)))
+            logger.info(" ***** Example samples ***** ")
+            logger.info(" Sent = {}".format(teachable_preds[0][0]))
+            logger.info(" t1 preds = {}".format(teachable_preds[0][1]))
+            logger.info(" t2 preds = {}".format(teachable_preds[0][2]))
+            logger.info(" s preds = {}".format(teachable_preds[0][3]))
 
-        # Save the tri-training config
-        tritrain_config = {
-            "Ext data dir": self.ext_data_dir, 
-            "Teacher 1": t1_dir, 
-            "Teacher 2": t2_dir,
-            "Teacher's e_rate": e_rate,
-            "Student": s_dir,
-            "Validate error on": self.val_on,
-            "U": self.U,
-            "Pool value u": self.u,
-            "tcfd_threshold": self.tcfd_threshold,
-            "scfd_threshold": self.scfd_threshold,
-            "Adaptive r_t": self.r_t,
-            "Adaptive r_s": self.r_s, 
-            "Similarity threshold": self.cos_score_threshold, 
-            "Num of teachable_preds": len(ext_sents),
-            "Prefix": len(ext_sents)
-            }
+            # Save this txt file is used for analysis
+            if self.save_teachable:
+                s_dir = s[1]
+                analysis_file = os.path.join(s_dir, "{}-analysis-samples.txt".format(len(teachable_preds)))
+                with open(analysis_file, "w", encoding="utf-8") as w:
+                    for features in teachable_preds:
+                        sent, (t1_label, t1cfd), (t2_labels, t2cfd), (s_labels, scfd)=features
+                        w.write(str(sent)+'\n')
+                        w.write(str(t1_label)+'\t')
+                        w.write(str(t1cfd)+'\n')
+                        w.write(str(t2_labels)+'\t')
+                        w.write(str(t2cfd)+'\n')
+                        w.write(str(s_labels)+'\t')
+                        w.write(str(scfd)+'\n')
+                        w.write('\n')
+                w.close()
+                logger.info("Save analysis samples under student model dir: {}".format(analysis_file))
 
-        json.dump(tritrain_config, open(os.path.join(self.ext_data_dir, "tri_config.json"), 'w'))
-        logger.info("Save tri-training config in dir: {}".format(self.ext_data_dir))
+            # Save as pkl for further re-training process, saved in student dir
+            ext_sents = [sent for (sent, *args) in teachable_preds]
+            ext_labels = []
+            for (_, (t1_label, t1_cfd), (t2_label, t2_cfd),*_) in teachable_preds:
+                if t1_label==t2_label:
+                    ext_labels.append(t1_label)
+                elif t1_cfd > t2_cfd:
+                    ext_labels.append(t1_label)
+                else:
+                    ext_labels.append(t2_label)
+            s_dir = s[1]
+            joblib.dump(ext_sents,'{}/{}_ext_sents.pkl'.format(s_dir, len(ext_sents)))
+            joblib.dump(ext_labels,'{}/{}_ext_labels.pkl'.format(s_dir, len(ext_labels)))
+            logger.info("Save ext teachable sentences, length:{}".format(len(ext_sents)))
+            logger.info("Save sents and labels as pkl file in dir: {}".format(s_dir))
+            ext_data_s.append((s_dir, len(ext_sents)))
 
-        return t1_dir, t2_dir, s_dir, e_rate, teachable_preds
+            # Save the tri-training config
+            tritrain_config = {
+                "Ext data in student dir": s_dir, 
+                "Teacher 1": t1[1], 
+                "Teacher 2": t2[1],
+                "Student": s_dir,
+                "U": self.U,
+                "Pool value u": self.u,
+                "tcfd_threshold": self.tcfd_threshold,
+                "scfd_threshold": self.scfd_threshold,
+                "Adaptive r_t": self.r_t,
+                "Adaptive r_s": self.r_s, 
+                "Similarity threshold": self.cos_score_threshold, 
+                "Num of teachable_preds": len(ext_sents),
+                "Prefix": len(ext_sents)
+                }
+
+            json.dump(tritrain_config, open(os.path.join(s_dir, "tri_config.json"), 'w'))
+            logger.info("Save tri-training config in dir: {}".format(s_dir))
+
+        # Once each of the three classifiers has been rotated to be t1, t2 and s,
+        # start to retrain s model on the expanded dataset respectively.
+
+        # ext_data_s = [(tri-models/s3_model/, 108), (tri-models/s1_model/, 96), (tri-models/s2_model/, 87)]
+        # for i in range(len(ext_data_s)):
+        #     tmp_ext_data_dir = ext_data_s[i][0]
+        #     prefix = ""
+        #     if tmp_ext_data_dir.find("s3") != -1:
+        #         prefix = "s3"
+        #         ori_s_dir = "sub_data/train-isw-s3.pkl"
+        #     elif tmp_ext_data_dir.find("s1") != -1:
+        #         prefix = "s1"
+        #         ori_s_dir = "sub_data/train-isw-s1.pkl"
+        #     else:
+        #         prefix = "s2"
+        #         ori_s_dir = "sub_data/train-isw-s2.pkl"
+        #     logger.info("-----Start to re-train student models: {}".format(tmp_ext_data_dir))
+        #     script = "python run_ner.py --max_seq_length 128 --do_train --do_subtrain --extend_L_tri --subtrain_dir {} --ext_data_dir {} --ext_output_dir tri-model/ext_{}_model/".format(ori_s_dir, tmp_ext_data_dir, prefix)
+        #     os.system(script)

@@ -20,14 +20,6 @@ def main():
     parser = argparse.ArgumentParser()
 
     ## Required parameters
-    parser.add_argument("--ext_data_dir",
-                        default='tri_ext_data',
-                        type=str,
-                        help="The dir saved the teachable samples as sents and labels pkl file.")
-    parser.add_argument("--val_on",
-                        default='test',
-                        type=str,
-                        help="The test samples for you to validate the error rate of teacher candidates.")
     parser.add_argument("--U",
                         default='data/dev-isw-sentences.pkl',
                         type=str,
@@ -107,12 +99,9 @@ def main():
     else:
         # Start tri-training
         logger.info(" ***** Start Tri-training ***** ")
-        if not os.path.exists(args.ext_data_dir):
-            os.makedirs(args.ext_data_dir)
-
         # Start tri-training : save teachable samples
-        tri_train = TriTraining(ext_data_dir=args.ext_data_dir, val_on=args.val_on, U=args.U, u=args.u, mi_dir=args.mi_dir, mj_dir=args.mj_dir, mk_dir=args.mk_dir, tcfd_threshold=args.tcfd_threshold, scfd_threshold=args.scfd_threshold, r_t=args.r_t, r_s=args.r_s, cos_score_threshold=args.cos_score_threshold)
-        t1_dir, t2_dir, s_dir, e_rate, teachable_preds = tri_train.fit()
+        tri_train = TriTraining(U=args.U, u=args.u, mi_dir=args.mi_dir, mj_dir=args.mj_dir, mk_dir=args.mk_dir, tcfd_threshold=args.tcfd_threshold, scfd_threshold=args.scfd_threshold, r_t=args.r_t, r_s=args.r_s, cos_score_threshold=args.cos_score_threshold)
+        tri_train.fit()
 
 if __name__ == '__main__':
     main()
