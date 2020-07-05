@@ -262,12 +262,13 @@ class TriTraining:
                     prefix = "s2"
                     ori_s_dir = "sub_data/train-isw-s2.pkl"
                 logger.info("***** Retraining each student models : {} *****".format(tmp_ext_data_dir))
-                ext_output_dir = "tri-ext-models/ext_{}_model/".format(prefix)
+                ext_output_dir = "tri-ext-models/{}_ext_{}_model/".format(it ,prefix)
                 # If there is a ext_model exsist in previous iteration, remove it and save the new_ext_model of this iteration.
-                if os.path.exists(ext_output_dir) and os.listdir(ext_output_dir):
-                    os.system("rm {}*".format(ext_output_dir))
-                    os.system("rmdir {}".format(ext_output_dir))
+                # if os.path.exists(ext_output_dir) and os.listdir(ext_output_dir):
+                #     os.system("rm {}*".format(ext_output_dir))
+                #     os.system("rmdir {}".format(ext_output_dir))
                     # extend again the ext_train_set in previous iteration, e.g. 7806+16+18+20
+                if it != 1:
                     ori_s_dir = ori_s_dir[:9]+"ext-"+ori_s_dir[9:]
                 script = "python run_ner.py --max_seq_length 128 --do_train --do_subtrain --extend_L_tri --it {} --subtrain_dir {} --ext_data_dir {} --ext_output_dir {}".format(it, ori_s_dir, tmp_ext_data_dir, ext_output_dir)
                 os.system(script)
