@@ -554,10 +554,14 @@ def main():
             if not os.path.exists(args.eval_dir):
                 os.makedirs(args.eval_dir)
             output_eval_file = os.path.join(args.eval_dir, "{}_{}_results.txt".format(args.it_prefix ,args.eval_on))
-        output_eval_file = os.path.join(output_dir, "{}_results.txt".format(args.eval_on))
-        with open(output_eval_file, "w") as writer:
-            logger.info("***** Save the results to {}: {}_results.txt *****".format(output_dir, args.eval_on))
-            writer.write(report)
+            with open(output_eval_file, "w") as writer:
+                logger.info("***** Save the results to {}: {}_{}_results.txt *****".format(args.eval_dir, args.it_prefix, args.eval_on))
+                writer.write(report)
+        else:
+            output_eval_file = os.path.join(output_dir, "{}_results.txt".format(args.eval_on))
+            with open(output_eval_file, "w") as writer:
+                logger.info("***** Save the results to {}: {}_results.txt *****".format(output_dir, args.eval_on))
+                writer.write(report)
 
 
 if __name__ == "__main__":
