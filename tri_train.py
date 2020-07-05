@@ -262,7 +262,7 @@ class TriTraining:
                     prefix = "s2"
                     ori_s_dir = "sub_data/train-isw-s2.pkl"
                 logger.info("***** Retraining each student models : {} *****".format(tmp_ext_data_dir))
-                ext_output_dir = "tri-model/ext_{}_model/".format(prefix)
+                ext_output_dir = "tri-ext-models/ext_{}_model/".format(prefix)
                 # If there is a ext_model exsist in previous iteration, remove it and save the new_ext_model of this iteration.
                 if os.path.exists(ext_output_dir) and os.listdir(ext_output_dir):
                     os.system("rm {}*".format(ext_output_dir))
