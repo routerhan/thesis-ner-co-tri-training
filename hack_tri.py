@@ -12,6 +12,18 @@ def main():
     parser.add_argument("--do_prerequisite",
                     action='store_true',
                     help="Whether to do all the set up, i.e. sampling and get candidates clfs.")
+    parser.add_argument("--u",
+                        default=200,
+                        type=int,
+                        help="the number of samples for tri-training in each iteration")
+    parser.add_argument("--tcfd_threshold",
+                        default=0.8,
+                        type=float,
+                        help="the tcfd_threshold for tri-training")
+    parser.add_argument("--scfd_threshold",
+                        default=0.5,
+                        type=float,
+                        help="the scfd_threshold for tri-training")
     
     args = parser.parse_args()
 
@@ -32,7 +44,7 @@ def main():
             os.system(script)
     else:
         logger.info(" ***** Start Tri-training pipeline ***** ")
-        script = "python run_tritrain.py --U machine_translation/2017_de_sents.txt --u 200 --mi_dir tri-models/s1_model/ --mj_dir tri-models/s2_model/ --mk_dir tri-models/s3_model/ --tcfd_threshold 0.7 --scfd_threshold 0.6 --r_t 0.1 --r_s 0.1"
+        script = "python run_tritrain.py --U machine_translation/2017_de_sents.txt --u {} --mi_dir tri-models/s1_model/ --mj_dir tri-models/s2_model/ --mk_dir tri-models/s3_model/ --tcfd_threshold {} --scfd_threshold {} --r_t 0.1 --r_s 0.1".format(args.u, args.tcfd_threshold, args.scfd_threshold)
         os.system(script)
 
 

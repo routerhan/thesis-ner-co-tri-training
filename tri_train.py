@@ -219,8 +219,6 @@ class TriTraining:
                         ext_labels.append(t2_label)
                 # 1_108_ext_sents.pkl
                 prefix = "{}_{}".format(it, len(ext_sents))
-                print("teachable ext_sents", ext_sents)
-                print("teachable ext_labels", ext_labels)
                 assert len(ext_sents) == len(ext_labels)
                 joblib.dump(ext_sents,'{}{}_ext_sents.pkl'.format(s_dir, prefix))
                 joblib.dump(ext_labels,'{}{}_ext_labels.pkl'.format(s_dir, prefix))
@@ -276,10 +274,11 @@ class TriTraining:
                 # Save the eval result of each student re-trained model
                 it_prefix = "{}_{}".format(it, prefix)
                 script = "python run_ner.py --do_eval --eval_on test --extend_L_tri --eval_dir tri-models/eval_monitor/ --ext_output_dir {} --it_prefix {}".format(ext_output_dir, it_prefix)
+                os.system(script)
             # Assign ext_model as new rotated candidates roles
-            self.mi = (Ner(model_dir="tri-model/ext_s1_model/"), "tri-model/ext_s1_model/")
-            self.mj = (Ner(model_dir="tri-model/ext_s2_model/"), "tri-model/ext_s2_model/")
-            self.mk = (Ner(model_dir="tri-model/ext_s3_model/"), "tri-model/ext_s3_model/")
+            self.mi = (Ner(model_dir="tri-ext-models/ext_s1_model/"), "tri-ext-models/ext_s1_model/")
+            self.mj = (Ner(model_dir="tri-ext-models/ext_s2_model/"), "tri-ext-models/ext_s2_model/")
+            self.mk = (Ner(model_dir="tri-ext-models/ext_s3_model/"), "tri-ext-models/ext_s3_model/")
             role_rotate = [(self.mi, self.mj, self.mk), (self.mj, self.mk, self.mi), (self.mi, self.mk, self.mj)]
             # Adjust teacher and student threshold as the knowledge gap is smaller
             self.tcfd_threshold = self.tcfd_threshold - self.r_t
