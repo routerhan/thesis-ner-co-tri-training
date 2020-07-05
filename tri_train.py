@@ -270,6 +270,7 @@ class TriTraining:
                     # extend again the ext_train_set in previous iteration, e.g. 7806+16+18+20
                 if it != 1:
                     ori_s_dir = ori_s_dir[:9]+"ext-"+ori_s_dir[9:]
+                    logger.info("***** Using previous ext_train_set : {} *****".format(ori_s_dir))
                 script = "python run_ner.py --max_seq_length 128 --do_train --do_subtrain --extend_L_tri --it {} --subtrain_dir {} --ext_data_dir {} --ext_output_dir {}".format(it, ori_s_dir, tmp_ext_data_dir, ext_output_dir)
                 os.system(script)
                 # Save the eval result of each student re-trained model
@@ -277,9 +278,9 @@ class TriTraining:
                 script = "python run_ner.py --do_eval --eval_on test --extend_L_tri --eval_dir tri-models/eval_monitor/ --ext_output_dir {} --it_prefix {}".format(ext_output_dir, it_prefix)
                 os.system(script)
             # Assign ext_model as new rotated candidates roles
-            self.mi = (Ner(model_dir="tri-ext-models/ext_s1_model/"), "tri-ext-models/ext_s1_model/")
-            self.mj = (Ner(model_dir="tri-ext-models/ext_s2_model/"), "tri-ext-models/ext_s2_model/")
-            self.mk = (Ner(model_dir="tri-ext-models/ext_s3_model/"), "tri-ext-models/ext_s3_model/")
+            self.mi = (Ner(model_dir="tri-ext-models/{}_ext_s1_model/".format(it)), "tri-ext-models/{}_ext_s1_model/".format(it))
+            self.mj = (Ner(model_dir="tri-ext-models/{}_ext_s2_model/".format(it)), "tri-ext-models/{}_ext_s2_model/".format(it))
+            self.mk = (Ner(model_dir="tri-ext-models/{}_ext_s3_model/".format(it)), "tri-ext-models/{}_ext_s3_model/".format(it))
             role_rotate = [(self.mi, self.mj, self.mk), (self.mj, self.mk, self.mi), (self.mi, self.mk, self.mj)]
             # Adjust teacher and student threshold as the knowledge gap is smaller
             self.tcfd_threshold = self.tcfd_threshold - self.r_t

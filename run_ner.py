@@ -317,6 +317,7 @@ def main():
                     prx = "s3"
                 ext_train_set = [(sent, label) for sent, label in zip(sentences, labels)]
                 joblib.dump(ext_train_set, "sub_data/ext-train-isw-{}.pkl".format(prx))
+                logger.info("***** Save ext-train-isw.pkl for next iteration : {} *****".format(prx))
 
         tokenizer = BertTokenizer.from_pretrained(args.bert_model, do_lower_case=args.do_lower_case)
         # train_examples = processor.get_train_examples(args.data_dir)
@@ -442,6 +443,7 @@ def main():
             "num_labels":len(label_list)+1,"label_map":label_map
             }
         json.dump(model_config,open(os.path.join(output_dir,"model_config.json"),"w"))
+        logger.info("***** Success to save model in dir : {} *****".format(output_dir))
     else:
         # Load a trained model and vocabulary that you have fine-tuned
         if args.extend_L or args.extend_L_tri:
