@@ -137,6 +137,17 @@ def main():
                         type=str,
                         required=False,
                         help="The output directory where the model predictions and checkpoints will be written.")
+    parser.add_argument("--eval_dir",
+                        default="/",
+                        help="If specified, the eval result will save into this dir, i.e. used for monitoring the tri-training result.")
+    parser.add_argument("--it_prefix",
+                        default="",
+                        type=str,
+                        help="The prefix for monitoring eval results of tri-training, in the format of it-subset, 1_s1")
+    parser.add_argument("--it",
+                        default=0,
+                        type=int,
+                        help="the iteration for tri-training")
 
     ## Other parameters
     parser.add_argument("--cache_dir",
@@ -286,7 +297,7 @@ def main():
             labels = [label for (sent, label) in s]
 
             if args.extend_L_tri:
-                with open('{}/tri_config.json'.format(args.ext_data_dir)) as f:
+                with open('{}/{}_tri_config.json'.format(args.ext_data_dir, args.it)) as f:
                     config = json.load(f)
                 prefix = config['Prefix']
 
@@ -295,8 +306,17 @@ def main():
                 tri_ext_labels = joblib.load('{}/{}_ext_labels.pkl'.format(args.ext_data_dir, prefix))
                 sentences = sentences + tri_ext_sents
                 labels = labels + tri_ext_labels
+                assert len(sentences) == len(labels)
                 # TODO : 1. ISW + teachable of S1 subeset + teachable
                 logger.info("---Tri-training---: Ext teachable L_ size: + {} = {}".format(len(tri_ext_sents), len(sentences)))
+                if args.subtrain_dir.find("s1") != -1:
+                    prx = "s1"
+                elif args.subtrain_dir.find("s2") != -1:
+                    prx = "s2"
+                else:
+                    prx = "s3"
+                ext_train_set = [(sent, label) for sent, label in zip(sentences, labels)]
+                joblib.dump(ext_train_set, "sub_data/ext-train-isw-{}.pkl".format(prx))
 
         tokenizer = BertTokenizer.from_pretrained(args.bert_model, do_lower_case=args.do_lower_case)
         # train_examples = processor.get_train_examples(args.data_dir)
@@ -530,6 +550,10 @@ def main():
         
         report = classification_report(y_true, y_pred, digits=4)
         logger.info("\n%s", report)
+        if args.eval_dir != "/":
+            if not os.path.exists(args.eval_dir):
+                os.makedirs(args.eval_dir)
+            output_eval_file = os.path.join(args.eval_dir, "{}_{}_results.txt".format(args.it_prefix ,args.eval_on))
         output_eval_file = os.path.join(output_dir, "{}_results.txt".format(args.eval_on))
         with open(output_eval_file, "w") as writer:
             logger.info("***** Save the results to {}: {}_results.txt *****".format(output_dir, args.eval_on))

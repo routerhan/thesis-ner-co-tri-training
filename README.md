@@ -340,22 +340,15 @@ python run_ner.py --output_dir tri-models/s2_model/ --max_seq_length 128 --do_tr
 python run_ner.py --output_dir tri-models/s3_model/ --max_seq_length 128 --do_train --do_subtrain --subtrain_dir sub_data/train-isw-s3.pkl
 ```
 
-* One line for `prerequisite`
-```
-python hack_tri.py
-```
-
 * Once you have 3 initial classifiers candidates for teacher-student, you may start tri-training !
 
-3. Evaluation of three candidates classifiers
-```
-python run_ner.py --data_dir data/full-isw-release.tsv --output_dir tri-models/s1_model/ --max_seq_length 128 --do_eval --eval_on test
-```
+* One-line trigger for whole setup by enabling arg `--do_prerequisite`
+`python hack_tri.py --do_prerequisite`
 
 
 ## Steps
 
-1. Execute the `run_tritrain.py`, which will assign `teacher-student roles` and also give you the `teachabel samples` as new adding labels for re-train the student model.
+1. Execute the `run_tritrain.py`, which will rotately assign `teacher-student roles` and also give you the `teachabel samples` as new adding labels to re-train the student model.
 
 * You may need to decide the value of teacher-student tri-training params.
 
@@ -373,22 +366,15 @@ python run_ner.py --data_dir data/full-isw-release.tsv --output_dir tri-models/s
 |`scfd_threshold`|0.6|The student confidence threshold for checking whether the sample x is teachable. i.ie student's cfd must lower that the threshold.|
 |`r_t`|0.1|The addaptive rate of threshold for teacher clf after each iteration.|
 |`r_s`|0.1|The addaptive rate of threshold for student clf after each iteration.|
+
+Enabling the `tri-training framework` by executing the following command:
 ```
 python run_tritrain.py --U data/dev-isw-sentences.pkl --u 3000 --mi_dir tri-models/s1_model/ --mj_dir tri-models/s2_model/ --mk_dir tri-models/s3_model/ --tcfd_threshold 0.7 --scfd_threshold 0.6 --r_t 0.1 --r_s 0.1
 ```
 
-* Assign teacher-student relationship
-```
-***** Assigning teacher and student clf ***** 
-e_ij : 0.0878
-e_ik : 0.1051
-e_jk : 0.0905
-teacher models are assign to : mi, mj
-```
+The command above will automatically runs the following steps:
 
-* We use the labeled set(i.e. test|dev set) for computing the `error_rate`, which is used to determiner teacher and student roles.
-
-* Example of teachable samples
+1. It will get each `teachable samples` of three init models and saved as pkl file under `student model dir` respectively, e.g. `tri-models/s2_model/`
 ```
 ***** Picking teachable samples ***** 
 num of teachable = 108
@@ -399,11 +385,13 @@ t2 preds = (['O', 'O', 'O', 'O', 'B-TITLE', 'B-PER', 'O', 'O']	0.7675)
 s preds = (['O', 'O', 'O', 'O', 'B-PER', 'I-PER', 'O', 'O']	0.4584)
 ```
 
-2. Use `teacherable samples` to extend the training data and re-train the model (i.e. student model)
+2. The next step is to re-train c1, c2, c3 with extended subsets respectively (s1, s2, s3 plus its `teachable instances`)
 
-3. Execute the `run_ner.py` script to train the ext model again, with `extent_L_tri` args enabled, which will take you to retrain the model with new adding `teachable samples` set. 
+3. The thresholds will be adjusted, as we assume that the knowledge gap between teachers and student is becoming smaller. 
 
-You may need to decide the value of following paras in this step.
+
+
+## TODO ??????????????/
 | Environment Variable| Default| Description|
 |---------------------|--------|------------|
 | `do_subtrain`  | store_true | Enable loading the subset of train data, i.e. s1, s2 or s3|

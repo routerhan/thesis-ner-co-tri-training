@@ -1,5 +1,6 @@
 import logging
 import joblib
+import html
 from random import choices
 from sklearn.model_selection import train_test_split
 from collections import Counter
@@ -131,3 +132,16 @@ def random_subsample_replacement(r=0.7, dataset="isw"):
     s3 = choices(train_set, k=len_sample)
     return s1, s2, s3
 
+# Load txt file as: 1. de_sents.txt, 2. en_sents.txt ..
+def prep_unlabeled_set(unlabel_dir):
+    """
+    para : the dir of unlabeled data set
+    return : list of sentences with index: [(1, 'I have apple'), (2, 'I am here'),..]
+    """
+    file = open(unlabel_dir, "r", encoding="utf-8")
+    sentences = []
+    for i, sent in enumerate(file):
+        sent=sent.strip()
+        sent=html.unescape(sent)
+        sentences.append((i, sent)) 
+    return sentences
