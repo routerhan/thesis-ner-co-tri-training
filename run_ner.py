@@ -428,6 +428,7 @@ def main():
 
         label_map = {i : label for i, label in enumerate(label_list,1)}
         model_config = {
+            "num_train_examples":len(sentences),
             "bert_model":args.bert_model,
             "do_lower":args.do_lower_case,
             "train_data_dir":args.data_dir,

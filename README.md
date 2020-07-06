@@ -115,7 +115,7 @@ macro avg     0.8564    0.8631    0.8592      5648
         "21": "B-ORG", "22": "B-PER", "23": "B-PERC", "24": "B-PRODUCT", "25": "B-PROJ", 
         "26": "B-QUANT", "27": "B-RATE", "28": "B-SORD", "29": "B-TIME", "30": "B-TITLE", 
         "31": "I-ADD", "32": "I-AGE", "33": "I-ART", "34": "I-CARDINAL", "35": "I-DATE", 
-        "36": "I-DUR", "37": "I-EVT", "38": "I-FAC", "39": "I-FRAC", "40": "I-FREQ", 
+        "36": "I-DUR",": "I-FAC", "39": "I-FRAC", "40": "I-FREQ", 
         "41": "I-GPE", "42": "I-LAN", "43": "I-LAW", "44": "I-LOC", "45": "I-MED", 
         "46": "I-MISC", "47": "I-MON", "48": "I-NRP", "49": "I-ORDINAL", "50": "I-ORG", 
         "51": "I-PER", "52": "I-PERC", "53": "I-PRODUCT", "54": "I-PROJ", "55": "I-QUANT", 
@@ -220,7 +220,7 @@ avg / total     0.8287    0.8545    0.8410     12585
     "21": "I-EVENT", "22": "I-FAC", "23": "I-GPE", "24": "I-LANGUAGE", "25": "I-LAW", 
     "26": "I-LOC", "27": "I-MONEY", "28": "I-NORP", "29": "I-ORDINAL", "30": "I-ORG", 
     "31": "I-PERCENT", "32": "I-PERSON", "33": "I-PRODUCT", "34": "I-QUANTITY", "35": "I-TIME", 
-    "36": "I-WORK_OF_ART", "37": "O", "38": "[CLS]", "39": "[SEP]"}
+    "36": "I-WORK_OF_A": "[CLS]", "39": "[SEP]"}
 }
 ```
 
@@ -340,17 +340,53 @@ python run_ner.py --output_dir tri-models/s2_model/ --max_seq_length 128 --do_tr
 python run_ner.py --output_dir tri-models/s3_model/ --max_seq_length 128 --do_train --do_subtrain --subtrain_dir sub_data/train-isw-s3.pkl
 ```
 
-* Once you have 3 initial classifiers candidates for teacher-student, you may start tri-training !
+One-line trigger for whole Prerequisite setup by enabling arg: `--do_prerequisite`, which will give you three initial classifiers, i.e. s1, s2 and s3
+```
+python hack_tri.py --do_prerequisite
+```
 
-* One-line trigger for whole setup by enabling arg `--do_prerequisite`
-`python hack_tri.py --do_prerequisite`
+The initial classifiers are saved under `tri-models`
+```
+$ tree tri-models/
+tri-models/
+|-- eval_monitor
+|-- s1_model
+|   |-- added_tokens.json
+|   |-- config.json
+|   |-- model_config.json
+|   |-- pytorch_model.bin
+|   |-- special_tokens_map.json
+|   |-- test_results.txt
+|   |-- tokenizer_config.json
+|   `-- vocab.txt
+|-- s2_model
+|   |-- added_tokens.json
+|   |-- config.json
+|   |-- model_config.json
+|   |-- pytorch_model.bin
+|   |-- special_tokens_map.json
+|   |-- test_results.txt
+|   |-- tokenizer_config.json
+|   `-- vocab.txt
+`-- s3_model
+    |-- added_tokens.json
+    |-- config.json
+    |-- model_config.json
+    |-- pytorch_model.bin
+    |-- special_tokens_map.json
+    |-- test_results.txt
+    |-- tokenizer_config.json
+    `-- vocab.txt
+```
+
+Once you have 3 initial classifiers candidates for teacher-student, you may start tri-training !
 
 
 ## Steps
 
-1. Execute the `run_tritrain.py`, which will rotately assign `teacher-student roles` and also give you the `teachabel samples` as new adding labels to re-train the student model.
+1. Execute the `run_tritrain.py`, which will rotately assign `teacher-student roles` and also give you the `teachabel samples` as new adding labels to re-train each student model.
 
-* You may need to decide the value of teacher-student tri-training params.
+You may need to decide the value of teacher-student tri-training params.
 
 | Environment Variable| Default| Description|
 |---------------------|--------|------------|
@@ -363,17 +399,27 @@ python run_ner.py --output_dir tri-models/s3_model/ --max_seq_length 128 --do_tr
 |`mj_dir`| tri-models/s2_model/ |The model dir trained on subset s2.|
 |`mk_dir`| tri-models/s3_model/ |The model dir trained on subset s3.|
 |`tcfd_threshold`|0.7|The teacher confidence threshold for checking whether the sample x is teachable. i.e. teacher's cfd must both over this threshold.|
-|`scfd_threshold`|0.6|The student confidence threshold for checking whether the sample x is teachable. i.ie student's cfd must lower that the threshold.|
+|`scfd_threshold`|0.6|The student confidence threshold for checking whether the sample x is teachable. i.e student's cfd must lower that the threshold.|
 |`r_t`|0.1|The addaptive rate of threshold for teacher clf after each iteration.|
 |`r_s`|0.1|The addaptive rate of threshold for student clf after each iteration.|
 
-Enabling the `tri-training framework` by executing the following command:
+
+Start Tri-training pipeline by executing the following command:
 ```
-python run_tritrain.py --U data/dev-isw-sentences.pkl --u 3000 --mi_dir tri-models/s1_model/ --mj_dir tri-models/s2_model/ --mk_dir tri-models/s3_model/ --tcfd_threshold 0.7 --scfd_threshold 0.6 --r_t 0.1 --r_s 0.1
+python hack_tri.py --u 3000 --tcfd_threshold 0.9 --scfd_threshold 0.5
 ```
 
 The command above will automatically runs the following steps:
+```
+For each iteration, while teacher's cfd threshold >= student's cfd threshold
+  Given a set of instances:
+    for each roles rotatation, i.e. either c1, c2 or c3 is student:
+      Return a set of `teachable` instances for student to learn
 
+  Re-train c1, c2, c3 with extended subsets respectively (s1, s2, s3 plus its `teachable instances`)
+
+  At the end of each iteration, the thresholds have to be adjusted, as we assume that the knowledge gap between teachers and student is becoming smaller. 
+```
 1. It will get each `teachable samples` of three init models and saved as pkl file under `student model dir` respectively, e.g. `tri-models/s2_model/`
 ```
 ***** Picking teachable samples ***** 
@@ -385,29 +431,51 @@ t2 preds = (['O', 'O', 'O', 'O', 'B-TITLE', 'B-PER', 'O', 'O']	0.7675)
 s preds = (['O', 'O', 'O', 'O', 'B-PER', 'I-PER', 'O', 'O']	0.4584)
 ```
 
-2. The next step is to re-train c1, c2, c3 with extended subsets respectively (s1, s2, s3 plus its `teachable instances`)
+2. Re-train c1, c2, c3 with extended teachable samples respectively (s1, s2, s3 plus its `teachable instances`)
+```
+Origin Student sub_data/ext-train-isw-s3.pkl L size: 7882
+---Tri-training---: Ext teachable L_ size: + 3 = 7885
+***** Save ext-train-isw.pkl for next iteration : s3 *****
+
+***** Running training *****
+Num examples = 7885
+Batch size = 32
+Num steps = 738
+
+Epoch: 100%|########################################| 3/3 
+***** Success to save model in dir : tri-ext-models/2_ext_s3_model/ *****
+```
 
 3. The thresholds will be adjusted, as we assume that the knowledge gap between teachers and student is becoming smaller. 
+```
+Adapted teacher threshold: 0.7, student threshold: 0.6
+***** End of iteration : 1 *****
+```
+
+4. Monitoring the eval result of each classifies at each iteration.
+```
+***** Save the results to tri-models/eval_monitor/: 1_s2_test_results.txt *****
+```
 
 
-
-## TODO ??????????????/
+## Important Key Script
 | Environment Variable| Default| Description|
 |---------------------|--------|------------|
 | `do_subtrain`  | store_true | Enable loading the subset of train data, i.e. s1, s2 or s3|
 | `subtrain_dir` | sub_data/train-isw-s3.pkl  | we need to specify the train data of `student` (either s1, s2 or s3), decided by the `error_rate`|
 | `extend_L_tri` | store_true |Enable executing the training phrase with new adding teachable samples for `retrain` the student clf.|
-| `ext_data_dir` | tri_ext_data/u_3000 | The data dir that saved teachable samples.|
-| `ext_output_dir` | tri-models/ext_108_tri_model/ |The dir which saved the retrained student clf from ext_teachable_data.|
+| `ext_data_dir` | sub_data/train-isw-{s3}.pkl | The data dir that saved teachable samples.|
+| `ext_output_dir` | tri-ext-models/{it}_ext_{s1}_model/ |The dir which saved the retrained student clf from ext_teachable_data.|
 ```
-python run_ner.py --max_seq_length 128 --do_train --do_subtrain --subtrain_dir sub_data/train-isw-s3.pkl --extend_L_tri
+// the ext_model will be saved in the directory `--ext_output_dir`
+
+python run_ner.py --max_seq_length 128 --do_train --do_subtrain --extend_L_tri --it {1} --subtrain_dir sub_data/train-isw-{s3}.pkl --ext_data_dir tri-models/{s3}_model/ --ext_output_dir tri-ext-models/{it}_ext_{s1}_model/
 ```
 
 4. Evaluate the retrained student model as we did before but enable `extend_L_tri`
 ```
-python run_ner.py --max_seq_length 128 --do_eval --eval_on test --extend_L_tri --ext_output_dir tri-models/ext_108_tri_model/
+python run_ner.py --do_eval --eval_on test --extend_L_tri --eval_dir tri-models/eval_monitor/ --ext_output_dir tri-ext-models/{it}_ext_{s1}_model/ --it_prefix {1}_{s3}
 ```
-* the ext_model will be saved in the directory `--ext_output_dir`
 
 
 # Simple API
