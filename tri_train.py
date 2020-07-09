@@ -262,7 +262,8 @@ class TriTraining:
                     prefix = "s2"
                     ori_s_dir = "sub_data/train-isw-s2.pkl"
                 logger.info("***** Retraining each student models : {} *****".format(tmp_ext_data_dir))
-                ext_output_dir = "tri-ext-models/{}_ext_{}_model/".format(it ,prefix)
+                ext_model_saved_dir = "tri-ext-models"
+                ext_output_dir = "{}/{}_ext_{}_model/".format(ext_model_saved_dir, it ,prefix)
                 # If there is a ext_model exsist in previous iteration, remove it and save the new_ext_model of this iteration.
                 # if os.path.exists(ext_output_dir) and os.listdir(ext_output_dir):
                 #     os.system("rm {}*".format(ext_output_dir))
@@ -278,9 +279,9 @@ class TriTraining:
                 script = "python run_ner.py --do_eval --eval_on test --extend_L_tri --eval_dir tri-models/eval_monitor/ --ext_output_dir {} --it_prefix {}".format(ext_output_dir, it_prefix)
                 os.system(script)
             # Assign ext_model as new rotated candidates roles
-            self.mi = (Ner(model_dir="tri-ext-models/{}_ext_s1_model/".format(it)), "tri-ext-models/{}_ext_s1_model/".format(it))
-            self.mj = (Ner(model_dir="tri-ext-models/{}_ext_s2_model/".format(it)), "tri-ext-models/{}_ext_s2_model/".format(it))
-            self.mk = (Ner(model_dir="tri-ext-models/{}_ext_s3_model/".format(it)), "tri-ext-models/{}_ext_s3_model/".format(it))
+            self.mi = (Ner(model_dir="{}/{}_ext_s1_model/".format(ext_model_saved_dir, it)), "{}/{}_ext_s1_model/".format(ext_model_saved_dir, it))
+            self.mj = (Ner(model_dir="{}/{}_ext_s2_model/".format(ext_model_saved_dir, it)), "{}/{}_ext_s2_model/".format(ext_model_saved_dir, it))
+            self.mk = (Ner(model_dir="{}/{}_ext_s3_model/".format(ext_model_saved_dir, it)), "{}/{}_ext_s3_model/".format(ext_model_saved_dir, it))
             role_rotate = [(self.mi, self.mj, self.mk), (self.mj, self.mk, self.mi), (self.mi, self.mk, self.mj)]
             # Adjust teacher and student threshold as the knowledge gap is smaller
             self.tcfd_threshold = self.tcfd_threshold - self.r_t
