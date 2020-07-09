@@ -10,18 +10,19 @@ logger = logging.getLogger(__name__)
 
 
 def main():
-    # python run_cotrain.py --modelA_dir models --modelB_dir test_model --unlabel_dir unlabel_sentences/2017_sentences.pkl --k 10 --u 10 --top_n 3 --save_preds --save_agree
-
+    # python run_cotrain.py --ext_output_dir ext_data --modelA_dir baseline_model --modelB_dir onto_model --de_unlabel_dir machine_translation/2017_de_sents.txt --en_unlabel_dir machine_translation/2017_en_sents.txt --k 10 --u 10 --top_n 3 --save_preds --save_agree
+    # python run_cotrain.py --ext_output_dir ext_data_1000 --modelA_dir baseline_model --modelB_dir onto_model --de_unlabel_dir machine_translation/2017_de_sents.txt --en_unlabel_dir machine_translation/2017_en_sents.txt --k 1000 --u 100 --top_n 10 --save_preds --save_agree
+    #python run_ner.py --data_dir data/full-isw-release.tsv --bert_model bert-base-german-cased --output_dir baseline_model/ --max_seq_length 128 --do_train --extend_L --ext_data_dir ext_data_1000 --ext_output_dir ext_isw_model
     parser = argparse.ArgumentParser()
 
     ## Required parameters
-    parser.add_argument("--unlabel_dir",
-                        default='unlabel_sentences/2017_sentences.pkl',
+    parser.add_argument("--ext_output_dir",
+                        default='ext_data/',
                         type=str,
                         required=True,
-                        help="The dir of unlabeled sentences.")
+                        help="The dir that you save the extended L set.")
     parser.add_argument("--modelA_dir",
-                        default='isw_model/',
+                        default='baseline_model/',
                         type=str,
                         required=True,
                         help="The dir of pre-trained model that will be used in the cotraining algorithm on the X1 feature set, e.g. German.")
@@ -30,9 +31,19 @@ def main():
                         type=str,
                         required=True,
                         help="The dir of another pre-trained model can be specified to be used on the X2 feature set, e.g. English.")
+    parser.add_argument("--de_unlabel_dir",
+                        default='machine_translation/2017_de_sents.txt',
+                        type=str,
+                        required=True,
+                        help="The dir of unlabeled sentences in German.")
+    parser.add_argument("--en_unlabel_dir",
+                        default='machine_translation/2017_en_sents.txt',
+                        type=str,
+                        required=True,
+                        help="The dir of unlabeled sentences in English.")
     parser.add_argument("--save_preds",
                         action='store_true',
-                        help="Whether to save the predictions.")
+                        help="Whether to save the confident predictions.")
     parser.add_argument("--save_agree",
                         action='store_true',
                         help="Whether to save the agree predictions, aka. the predictions that will be added to L set.")
@@ -51,21 +62,21 @@ def main():
     args = parser.parse_args()
 
     # Initialize co-training class
-    co_train = CoTraining(unlabel_dir=args.unlabel_dir, modelA_dir=args.modelA_dir, modelB_dir=args.modelB_dir, save_preds=args.save_preds, top_n=args.top_n, k=args.k, u=args.u)
-    unlabeled_sentences = co_train.prep_unlabeled_set(unlabel_dir=args.unlabel_dir)
+    if os.path.exists(args.ext_output_dir) and os.listdir(args.ext_output_dir):
+        raise ValueError("Output directory ({}) already exists and is not empty.".format(args.ext_output_dir))
+    if not os.path.exists(args.ext_output_dir):
+        os.makedirs(args.ext_output_dir)
+
+    co_train = CoTraining(modelA_dir=args.modelA_dir, modelB_dir=args.modelB_dir, save_preds=args.save_preds, top_n=args.top_n, k=args.k, u=args.u)
+    compare_agree_list = co_train.fit(ext_output_dir=args.ext_output_dir, de_unlabel_dir=args.de_unlabel_dir, en_unlabel_dir=args.en_unlabel_dir, save_agree=args.save_agree, save_preds=args.save_preds)
 
     logger.info(" ***** Running Co-Training ***** ")
     logger.info(" Model A = {}".format(args.modelA_dir))
     logger.info(" Model B = {}".format(args.modelB_dir))
-    logger.info("Top_n: {}, iteration_k: {}, num_unlabel_samples_u: {}".format(args.top_n, args.k, args.u))
+    logger.info("Top_n: {}, iteration_k: {}, sample_pool_u: {}".format(args.top_n, args.k, args.u))
 
-    logger.info(" ***** Loading Unlabeled Set ***** ")
-    logger.info(" Num of {} samples: {}".format(args.unlabel_dir ,len(unlabeled_sentences)))
-    for index ,sentence in enumerate(unlabeled_sentences[:3]):
-        logger.info(" sent {} : {}".format(index, sentence))
-    
-    logger.info(" ***** Agree Sent Example ***** ")
-    co_train.get_agree_preds(save_agree=True)
+    logger.info(" ***** Loading Agree Set ***** ")
+    logger.info(" Num of agree samples: {}".format(len(compare_agree_list)))
     
 if __name__ == '__main__':
     main()

@@ -1,5 +1,7 @@
 import logging
 import joblib
+import html
+from random import choices
 from sklearn.model_selection import train_test_split
 from collections import Counter
 from preprocessor import IswPreprocessor, OntoPreprocessor
@@ -35,13 +37,13 @@ def split_data(data_dir='data/full-isw-release.tsv'):
         logger.info("  Num train = %d", len(X_train))
         logger.info("  Num dev = %d", len(X_val))
         logger.info("  Num test = %d", len(X_test))
-        logger.info("***** Save as pkl in /data *****")
-        joblib.dump(X_train,'data/train-{}-sentences.pkl'.format(dataset))
-        joblib.dump(y_train,'data/train-{}-labels.pkl'.format(dataset))
-        joblib.dump(X_test,'data/test-{}-sentences.pkl'.format(dataset))
-        joblib.dump(y_test,'data/test-{}-labels.pkl'.format(dataset))
-        joblib.dump(X_val,'data/dev-{}-sentences.pkl'.format(dataset))
-        joblib.dump(y_val,'data/dev-{}-labels.pkl'.format(dataset))
+        # logger.info("***** Save as pkl in /data *****")
+        # joblib.dump(X_train,'data/train-{}-sentences.pkl'.format(dataset))
+        # joblib.dump(y_train,'data/train-{}-labels.pkl'.format(dataset))
+        # joblib.dump(X_test,'data/test-{}-sentences.pkl'.format(dataset))
+        # joblib.dump(y_test,'data/test-{}-labels.pkl'.format(dataset))
+        # joblib.dump(X_val,'data/dev-{}-sentences.pkl'.format(dataset))
+        # joblib.dump(y_val,'data/dev-{}-labels.pkl'.format(dataset))
 
     return label_list, num_labels
 
@@ -109,3 +111,37 @@ def get_hyperparameters(model, ff):
         optimizer_grouped_parameters = [{"params": [p for n, p in param_optimizer]}]
 
     return optimizer_grouped_parameters
+
+def random_subsample_replacement(r=0.7, dataset="isw"):
+    """
+    sampling with replacement, i.e. sampling 70% origin isw-train with replacement.
+    Return : [("Ich bin 12", ['O', 'O', 'QUANT']), (), ...]
+    """
+    sents = joblib.load('data/train-{}-sentences.pkl'.format(dataset))
+    labels = joblib.load('data/train-{}-labels.pkl'.format(dataset))
+    # Zip the sents and its tags
+    train_set = []
+    for sent, label in zip(sents, labels):
+        train_set.append((sent, label))
+    assert len(train_set) == len(sents)
+
+    len_sample = int(len(train_set)*r)
+
+    s1 = choices(train_set, k=len_sample)
+    s2 = choices(train_set, k=len_sample)
+    s3 = choices(train_set, k=len_sample)
+    return s1, s2, s3
+
+# Load txt file as: 1. de_sents.txt, 2. en_sents.txt ..
+def prep_unlabeled_set(unlabel_dir):
+    """
+    para : the dir of unlabeled data set
+    return : list of sentences with index: [(1, 'I have apple'), (2, 'I am here'),..]
+    """
+    file = open(unlabel_dir, "r", encoding="utf-8")
+    sentences = []
+    for i, sent in enumerate(file):
+        sent=sent.strip()
+        sent=html.unescape(sent)
+        sentences.append((i, sent)) 
+    return sentences

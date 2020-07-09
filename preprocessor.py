@@ -23,8 +23,6 @@ def convert_examples_to_features(all_sentences, all_labels, label_list, max_seq_
     :input_ids, input_mask, segment_ids, label_ids, valid_ids, label_mask
     """
     label_map = {label : i for i, label in enumerate(label_list, 1)}
-    print('hi label_map', label_map)
-    print('\n')
 
     features = []
     for index, sentence in enumerate(all_sentences):
@@ -91,18 +89,18 @@ def convert_examples_to_features(all_sentences, all_labels, label_list, max_seq_
         assert len(valid) == max_seq_length
         assert len(label_mask) == max_seq_length
 
-        if index < 5:
+        if index < 3:
             logger.info("*** Features Example ***")
-            logger.info("textlist: %s" % " ".join([str(x) for x in textlist]))
-            logger.info("labellist: %s" % " ".join([str(x) for x in labellist]))
-            logger.info("tokens: %s" % " ".join([str(x) for x in tokens]))
-            logger.info(len(tokens))
-            logger.info("input_ids: %s" % " ".join([str(x) for x in input_ids]))
-            logger.info("input_mask: %s" % " ".join([str(x) for x in input_mask]))
-            logger.info("valid: %s" % " ".join([str(x) for x in valid]))
-            logger.info("label_ids: %s" % " ".join([str(x) for x in label_ids]))
-            logger.info("label_mask: %s" % " ".join([str(x) for x in label_mask]))
-            logger.info("segment_ids: %s" % " ".join([str(x) for x in segment_ids]))
+            logger.info("textlist: {}".format(textlist))
+            logger.info("labellist: {}".format(labellist))
+            logger.info("tokens: {}".format(tokens))
+            logger.info("len_toks: {}".format(len(tokens)))
+            # logger.info("input_ids: %s" % " ".join([str(x) for x in input_ids]))
+            # logger.info("input_mask: %s" % " ".join([str(x) for x in input_mask]))
+            # logger.info("valid: %s" % " ".join([str(x) for x in valid]))
+            # logger.info("label_ids: %s" % " ".join([str(x) for x in label_ids]))
+            # logger.info("label_mask: %s" % " ".join([str(x) for x in label_mask]))
+            # logger.info("segment_ids: %s" % " ".join([str(x) for x in segment_ids]))
             # logger.info("label: %s (id = %d)" % (example.label, label_ids))
 
         features.append(

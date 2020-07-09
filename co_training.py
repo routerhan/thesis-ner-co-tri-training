@@ -2,6 +2,9 @@ import os
 import utils
 import logging
 import joblib
+import html
+import re
+import json
 from predict import Ner
 from run_ner import load_train_data
 
@@ -32,7 +35,7 @@ class CoTraining:
 	u - The size of the pool of unlabeled samples from which the classifier can choose. Default - 75 
 	"""
 
-	def __init__(self, modelA_dir:str, modelB_dir:str, top_n=5, k=3, u=40, save_preds=False, unlabel_dir=""):
+	def __init__(self, modelA_dir:str, modelB_dir:str, top_n=5, k=3, u=40, save_preds=False):
 		self.top_n = top_n
 		self.k = k
 		self.u = u
@@ -44,19 +47,21 @@ class CoTraining:
 		# Cosine similarity score threshold for the level of agreement.
 		self.cos_score_threshold = 0.7
 
-
+	# Load txt file as: 1. de_sents.txt, 2. en_sents.txt ..
 	def prep_unlabeled_set(self, unlabel_dir):
 		"""
 		para : the dir of unlabeled data set
 		return : list of sentences with index: [(1, 'I have apple'), (2, 'I am here'),..]
 		"""
-		sentences = joblib.load(unlabel_dir)
-		sentences = [(i, sent) for i, sent in enumerate(sentences)]
-		# mock small size
-		sentences = sentences[:105] 
+		file = open(unlabel_dir, "r", encoding="utf-8")
+		sentences = []
+		for i, sent in enumerate(file):
+			sent=sent.strip()
+			sent=html.unescape(sent)
+			sentences.append((i, sent)) 
 		return sentences
 
-	def get_confident_preds(self, clf, unlabel_dir):
+	def get_confident_preds(self, clf, unlabel_dir, model_dir, save_preds=False):
 		"""
 		This function will return confident predictions after iterations.
 		
@@ -67,7 +72,6 @@ class CoTraining:
 		top_n_preds: [(index, sent, labels, confident_score), ...]
 		"""
 		U = self.prep_unlabeled_set(unlabel_dir)
-		# TODO : give the unique index for sent...
 
 		top_n_preds = []
 		it = 0
@@ -94,9 +98,21 @@ class CoTraining:
 			
 			temp_top_preds = sorted(preds, key=lambda tup: tup[3], reverse=True)[:self.top_n]
 			[top_n_preds.append(tA) for tA in temp_top_preds]
+		
+		if save_preds:
+			labeded_file = os.path.join(model_dir, "labeled_results.txt")
+			with open(labeded_file, "w", encoding="utf-8") as writer:
+				for (i, sentence, label, avg_cfd_score) in top_n_preds:
+					writer.write(str(i)+'\n')
+					writer.write(str(sentence)+'\n')
+					writer.write(str(label)+'\n')
+					writer.write(str(avg_cfd_score)+'\n')
+					writer.write('\n')
+			writer.close()
+
 		return top_n_preds
 
-	def fit(self, save_preds:bool, unlabel_dir, label_dir=""):
+	def fit(self, save_preds:bool, save_agree:bool, ext_output_dir, de_unlabel_dir, en_unlabel_dir, label_dir=""):
 		"""
 		This func will execute co-training algorithm.
 
@@ -111,23 +127,41 @@ class CoTraining:
 		"""
 
 		# Get top_n preds of each iteraions, which should be ready to be used for extending L.
-		top_A = self.get_confident_preds(clf=self.clf_A, unlabel_dir=unlabel_dir)
-		top_B = self.get_confident_preds(clf=self.clf_B, unlabel_dir=unlabel_dir)
+		top_A = self.get_confident_preds(clf=self.clf_A, unlabel_dir=de_unlabel_dir, save_preds=True, model_dir=self.modelA_dir)
+		top_B = self.get_confident_preds(clf=self.clf_B, unlabel_dir=en_unlabel_dir, save_preds=True, model_dir=self.modelB_dir)
+
+		# The sentences should be the same but in different languages. => cross-lingual features.
+		assert len(top_A) == len(top_B)
 		
 		# Get agree preds between two models: identical check and confident_score
-		compare_agree_list = self.get_agree_preds(predA=top_A, predB=top_B, save_agree=True)
+		
+		compare_agree_list, ext_L_A_sents, ext_L_A_labels, ext_L_B_sents, ext_L_B_labels = self.get_agree_preds(predA=top_A, predB=top_B, save_agree=True, ext_output_dir=ext_output_dir)
 
+		joblib.dump(ext_L_A_sents,'{}/{}_ext_L_A_sents.pkl'.format(ext_output_dir, len(ext_L_A_sents)))
+		logger.info("Save ext de sentences, length:{}".format(len(ext_L_A_sents)))
 
-		# Get agree preds between two models: identical check and confident_score
-		# L_A, L_B = self.get_agree_preds(self, predA=top_A, predB=top_B, ignore_O=True, save_agree=False)
+		joblib.dump(ext_L_A_labels,'{}/{}_ext_L_A_labels.pkl'.format(ext_output_dir, len(ext_L_A_labels)))
+		logger.info("Save ext de labels, length:{}".format(len(ext_L_A_labels)))
 
-		# Extend train set....TODO: train data is in format of sentences and labels, as pkl...
-		# Maybe write a finction to deal with it....
-		# _, _, L_sents, L_labels = load_train_data(data_dir=label_dir)
-		# extend_Eng_train_set()
-		# extend_Gem_train_set()
-		# Retrain
+		joblib.dump(ext_L_B_sents,'{}/{}_ext_L_B_sents.pkl'.format(ext_output_dir, len(ext_L_B_sents)))
+		logger.info("Save ext en sentences, length:{}".format(len(ext_L_B_sents)))
 
+		joblib.dump(ext_L_B_labels,'{}/{}_ext_L_B_labels.pkl'.format(ext_output_dir, len(ext_L_B_labels)))
+		logger.info("Save ext en labels, length:{}".format(len(ext_L_B_labels)))
+
+		cotrain_config={
+			"ext_output_dir": ext_output_dir,
+            "Approach":"Cross-lingual Co-training",
+            "Model A de":self.modelA_dir,
+            "Model B en":self.modelB_dir,
+            "Pool value u":self.u,
+            "Confident top_n":self.top_n,
+            "Iteration k":self.k,
+            "Agree threshold cos_score":self.cos_score_threshold,
+			"Ext number of L_" : len(ext_L_A_sents),
+			"Prefix": len(ext_L_A_sents)
+			}
+		json.dump(cotrain_config, open(os.path.join(ext_output_dir, "cotrain_config.json"), 'w'))
 		return compare_agree_list
 
 
@@ -152,7 +186,7 @@ class CoTraining:
 		
 		if save_preds:
 			labeded_file = os.path.join(model_dir, "labeled_results.txt")
-			with open(labeded_file, "w") as writer:
+			with open(labeded_file, "w", encoding="utf-8") as writer:
 				for i, feature in enumerate(features):
 					writer.write(str(feature.index)+'\n')
 					writer.write(str(feature.sentence)+'\n')
@@ -162,8 +196,24 @@ class CoTraining:
 			writer.close()
 
 		return features
+	
+	def multiple_replace(self, text):
+		# Create a regular expression  from the dictionary keys
+		dict={
+			"EVENT" : "EVT",
+			"LANGUAGE" : "LAN",
+			"MONEY" : "MON",
+			"NORP" : "NRP",
+			"PERSON" : "PER",
+			"PERCENT" : "PERC",
+			"QUANTITY" : "QUAN",
+			"WORK_OF_ART" :"ART"
+		}
+		regex = re.compile("(%s)" % "|".join(map(re.escape, dict.keys())))
+		# For each match, look-up corresponding value in dictionary
+		return regex.sub(lambda mo: dict[mo.string[mo.start():mo.end()]], text)
 
-	def get_agree_preds(self, predA, predB, save_agree=False, ignore_O=True):
+	def get_agree_preds(self, predA, predB, save_agree=False, ignore_O=True, ext_output_dir=""):
 		"""
 		return : a tuple both-agreed confident predicted data from predA and predB.
 		-both-agreed -> cosine similarity score, for multi-labels comparison.
@@ -182,11 +232,17 @@ class CoTraining:
 		A_id_list = [i for (i, _, _, _)in predA ]
 		B_id_list = [i for (i, _, _, _)in predB ]
 		mutual_sent_ids = set(A_id_list) & set(B_id_list)
-		print("mutual_sent_ids", sorted(mutual_sent_ids))
+		# print("mutual_sent_ids", sorted(mutual_sent_ids))
 
 		mutual_A = sorted([pred for pred in predA if pred[0] in mutual_sent_ids], key=lambda tup: tup[0], reverse=False)
 		mutual_B = sorted([pred for pred in predB if pred[0] in mutual_sent_ids], key=lambda tup: tup[0], reverse=False)
 		
+		# There are the extended L_ set for adding the original train set.
+		ext_L_A_sents=[]
+		ext_L_A_labels=[]
+		ext_L_B_sents=[]
+		ext_L_B_labels=[]
+
 		compare_list = []
 		for (A_i, A_sent, A_label, A_score), (B_i, B_sent, B_label, B_score) in zip(mutual_A, mutual_B):
 			# index of sent should be the same
@@ -199,29 +255,25 @@ class CoTraining:
 				A_tag_list = A_label
 				B_tag_list = B_label
 			
+			# Map NER tag , e.g. PERSON -> PER
+			B_tag_list = [self.multiple_replace(tag) for tag in B_tag_list]
 			cos_score = utils.cosine_similarity(A_tag_list=A_tag_list, B_tag_list=B_tag_list)
 
 			if cos_score > self.cos_score_threshold:
+				ext_L_A_sents.append(" ".join(A_sent))
+				ext_L_B_sents.append(" ".join(B_sent))
+				ext_L_A_labels.append(A_label)
+				ext_L_B_labels.append(B_label)
+				
 				compare_list.append((A_i, A_sent, A_label, A_score, B_sent, B_label, B_score, cos_score))
 			else:
 				pass
-		print("agree_sent_ids", [i for (i, *tail) in compare_list ])
-		
-		# for (sent_index, A_tag_list, A_avg_cfd_score, B_tag_list, B_avg_cfd_score, cos_score) in compare_list:
-		# 	if cos_score > 0.7:
-		# 		# take one model as example
-		# 		print('predA_sent: ', self.predA[i].sentence)
-		# 		print('predA_label: ', self.predA[i].label)
-		# 		print('predA_score: ', self.predA[i].avg_cfd_score)
-		# 		print('')
-		# 		print('predB_sent: ', self.predB[i].sentence)
-		# 		print('predB_label: ', self.predB[i].label)
-		# 		print('predB_score: ', self.predB[i].avg_cfd_score)
-		# 		print('cos_score:', cos_score)
-		# 		break
+		# print("agree_sent_ids", [i for (i, *tail) in compare_list ])
+		# Number of extended sents should be the same as two models
+		assert len(ext_L_A_sents) == len(ext_L_B_sents)
 
 		if save_agree:
-			with open("agree_results.txt", "w") as writer:
+			with open("{}/agree_results.txt".format(ext_output_dir), "w", encoding="utf-8") as writer:
 				for feature in compare_list:
 					A_i, A_sent, A_label, A_cfd_score, B_sent, B_label, B_cfd_score, cos_score = feature
 					writer.write(str(A_i)+'\n')
@@ -234,27 +286,8 @@ class CoTraining:
 					writer.write(str(cos_score) + '\n')
 					writer.write('\n')
 			writer.close()
-		return compare_list
+		return compare_list, ext_L_A_sents, ext_L_A_labels, ext_L_B_sents, ext_L_B_labels
 
 
-
-# co_train = CoTraining(modelA_dir='models/', modelB_dir='test_model', save_preds=True, unlabel_dir='unlabel_sentences/2017_sentences.pkl')
-# unlabeled_sents = co_train.prep_unlabeled_set(unlabel_dir='unlabel_sentences/2017_sentences.pkl')
-# print('U set:', unlabeled_sents[:3])
-
-# i = 32
-# # take one model as example
-# print('predA_sent: ', co_train.predA[i].sentence)
-# print('predA_label: ', co_train.predA[i].label)
-# print('predA_score: ', co_train.predA[i].avg_cfd_score)
-
-# print('\n')
-# print('predB_sent: ', co_train.predB[i].sentence)
-# print('predB_label: ', co_train.predB[i].label)
-# print('predB_score: ', co_train.predB[i].avg_cfd_score)
-
-# print("get_agree_preds")
-# co_train.get_agree_preds(save_agree=True)
-
-co_train = CoTraining(modelA_dir='models/', modelB_dir='test_model', save_preds=True, unlabel_dir='unlabel_sentences/2017_sentences.pkl')
-compare_agree_list = co_train.fit(unlabel_dir='unlabel_sentences/2017_sentences.pkl', save_preds=True)
+# co_train = CoTraining(modelA_dir='baseline_model/', modelB_dir='onto_model/', save_preds=True)
+# compare_agree_list = co_train.fit(ext_output_dir='ext_data', de_unlabel_dir='machine_translation/2017_de_sents.txt', en_unlabel_dir='machine_translation/2017_en_sents.txt', save_agree=True, save_preds=True)

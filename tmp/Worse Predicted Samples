@@ -1,0 +1,112 @@
+Worse Predicted Samples
+
+{'AGE': {'before': 0.6245, 'after': 0.5789},
+ 'LAN': {'before': 0.9483, 'after': 0.9468},
+ 'MISC': {'before': 0.6835, 'after': 0.6353},
+ 'ORDINAL': {'before': 0.823, 'after': 0.8033},
+ 'ORG': {'before': 0.6866, 'after': 0.6842},
+ 'PER': {'before': 0.8622, 'after': 0.8546},
+ 'SORD': {'before': 0.7516, 'after': 0.7417},
+ 'TITLE': {'before': 0.9032, 'after': 0.8525}}
+
+
+ 
+'AGE'
+sent    Der ist 38 verhaftet worden er war 18 Jahre und ist verhaftet worden und ist nach Dachau gekommen
+True Tag['O', 'O', 'B-DATE', 'O', 'O', 'O', 'O', 'B-AGE', 'I-AGE', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-FAC', 'O']
+baseline['O', 'O', 'B-DATE', 'O', 'O', 'O', 'O', 'B-AGE', 'I-AGE', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-FAC', 'O']
+ext_tag ['O', 'O', 'I-DATE', 'O', 'O', 'O', 'O', 'B-AGE', 'I-DUR', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-FAC', 'O']
+
+sent    Die haben Leute von sechsunddreißig die haben nicht das Wissen
+True Tag['O', 'O', 'O', 'O', 'B-AGE', 'O', 'O', 'O', 'O', 'O']
+baseline['O', 'O', 'O', 'O', 'B-AGE', 'O', 'O', 'O', 'O', 'O']
+ext_tag ['O', 'O', 'O', 'B-AGE', 'B-AGE', 'O', 'O', 'O', 'O', 'O']
+
+sent    Die waren alte Leute die waren vielleicht ich weiß nicht wie alt aber sie waren Er war schon pensioniert
+True Tag['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+baseline['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+ext_tag ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-AGE', 'I-AGE', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+
+
+
+'LAN'
+sent Ich sage Ihnen das ist nicht österreichischer Rundfunk das ist deutscher Rundfunk
+True ['O', 'O', 'O', 'O', 'O', 'O', 'B-NRP', 'O', 'O', 'O', 'B-NRP', 'O']
+base ['O', 'O', 'O', 'O', 'O', 'O', 'B-NRP', 'O', 'O', 'O', 'B-NRP', 'O']
+ext  ['O', 'O', 'O', 'O', 'O', 'O', 'B-NRP', 'O', 'O', 'O', 'B-LAN', 'O']
+
+sent Wir waren mehr Engländer als Englische
+True ['O', 'O', 'O', 'B-NRP', 'O', 'B-NRP']
+base ['O', 'O', 'O', 'B-NRP', 'O', 'B-NRP']
+ext  ['O', 'O', 'O', 'B-NRP', 'O', 'B-LAN']
+
+sent Nein nein da sind meistens deutsch äh Deutsche nicht Österreicher
+True ['O', 'O', 'O', 'O', 'O', 'B-NRP', 'O', 'B-NRP', 'O', 'B-NRP']
+base ['O', 'O', 'O', 'O', 'O', 'B-NRP', 'O', 'B-NRP', 'O', 'B-NRP']
+ext  ['O', 'O', 'O', 'O', 'O', 'B-LAN', 'O', 'B-NRP', 'O', 'B-NRP']
+
+
+'MISC'
+sent Er hat genau alles gewusst unser Leben warn sehr befreundet warn Bar Mizwa war nicht so wie mans heute macht mit 800 Leute mit 700 Leute es war ja viel bescheidener in der Synagoge hab ich meinen meinen Teil runtergeradelt und hab mehr oder weniger in lateinischen Buchstaben aufgeschrieben was in Hebräisch gestanden ist und ich hab meine Rede gehalten in der Rede hab ich mich auch geirrt hab von Neuem angefangen ka Mensch hat das gemerkt
+True ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-TIME', 'O', 'O', 'B-CARDINAL', 'O', 'O', 'B-CARDINAL', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LAN', 'O', 'O', 'O', 'O', 'B-LAN', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+base ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-TIME', 'O', 'O', 'B-CARDINAL', 'O', 'O', 'B-CARDINAL', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LAN', 'O', 'O', 'O', 'O', 'B-LAN', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+ext  ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-TIME', 'O', 'O', 'B-CARDINAL', 'O', 'O', 'B-CARDINAL', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-MISC', 'O', 'O', 'O', 'O', 'B-LAN', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+
+
+
+'ORDINAL'
+sent Das heißt Sie haben das erste Studienjahr nicht ganz fertig machen können
+True ['O', 'O', 'O', 'O', 'O', 'B-ORDINAL', 'O', 'O', 'O', 'O', 'O', 'O']
+base ['O', 'O', 'O', 'O', 'O', 'B-ORDINAL', 'O', 'O', 'O', 'O', 'O', 'O']
+ext  ['O', 'O', 'O', 'O', 'O', 'B-DUR', 'O', 'O', 'O', 'O', 'O', 'O']
+
+sent Wo ich die ersten Arbeiten die ich gemacht hab war ich hab Deutsch gesprochen also man musste auf Deutsch mit mir reden oder Englisch
+True ['O', 'O', 'O', 'B-ORDINAL', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LAN', 'O', 'O', 'O', 'O', 'O', 'B-LAN', 'O', 'O', 'O', 'O', 'B-LAN']
+base ['O', 'O', 'O', 'B-ORDINAL', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LAN', 'O', 'O', 'O', 'O', 'O', 'B-LAN', 'O', 'O', 'O', 'O', 'B-LAN']
+ext  ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LAN', 'O', 'O', 'O', 'O', 'O', 'B-LAN', 'O', 'O', 'O', 'O', 'B-LAN']
+
+
+
+'ORG'
+sent Die Firma unsere Firma ha Marschall s Middle East geheißen und wir wir habn eigentlich in die ar n arabischen Teil des war Kontraband ja und swar gefährlich die Warn herüber zubringen
+True ['O', 'O', 'O', 'O', 'O', 'B-ORG', 'I-ORG', 'I-ORG', 'I-ORG', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-NRP', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+base ['O', 'O', 'O', 'O', 'O', 'B-LOC', 'I-ORG', 'I-LOC', 'I-LOC', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-NRP', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+ext  ['O', 'O', 'O', 'O', 'O', 'B-ORG', 'I-ORG', 'I-ORG', 'I-ORG', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-NRP', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+
+sent Es waren in der Albertgasse Externistenkurse einjährige und die Vorbedingung war dass durch die sechs Jahre gelernt hatten und dann zum Volkssturm ein mobilisiert wurden oder durch andere Gründe die das Fehlende für die Matura nachholen konnten
+True ['O', 'O', 'O', 'O', 'B-FAC', 'O', 'B-DUR', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-DUR', 'I-DUR', 'O', 'O', 'O', 'B-TIME', 'O', 'B-ORG', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+base ['O', 'O', 'O', 'O', 'B-FAC', 'O', 'B-DUR', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-DUR', 'I-DUR', 'O', 'O', 'O', 'B-TIME', 'O', 'B-ORG', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+ext  ['O', 'O', 'O', 'O', 'B-FAC', 'O', 'B-DUR', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-DUR', 'I-DUR', 'O', 'O', 'O', 'B-TIME', 'O', 'B-FAC', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+
+
+'PER'
+sent Hier steht ah wenn man auf Hebräisch sagt Zimmerim die Das ist zum Totlachen
+True ['O', 'O', 'O', 'O', 'O', 'O', 'B-LAN', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+base ['O', 'O', 'O', 'O', 'O', 'O', 'B-LAN', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+ext  ['O', 'O', 'O', 'O', 'O', 'O', 'B-LAN', 'O', 'B-PER', 'O', 'O', 'O', 'O', 'O']
+
+sent Der Freund kann sein ein Franzos ein Russ
+True ['O', 'O', 'O', 'O', 'O', 'B-NRP', 'O', 'B-NRP']
+base ['O', 'O', 'O', 'O', 'O', 'B-NRP', 'O', 'B-NRP']
+ext  ['O', 'O', 'O', 'O', 'O', 'B-PER', 'O', 'B-NRP']
+
+
+
+'SORD'
+sent Manchmal wenn ich will dass meine Enkelin nicht so genau verstehen soll dann spreche ich mit meiner Tochter wieder Deutsch
+True ['B-FREQ', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-TIME', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LAN']
+base ['B-FREQ', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-TIME', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LAN']
+ext  ['B-FREQ', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-TIME', 'O', 'O', 'O', 'O', 'O', 'B-SORD', 'B-LAN']
+
+sent Und da hat es uns auch beinahe wieder erwischt knapp vor uns hat eine Bombe eingeschlagen
+True ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-SORD', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+base ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-SORD', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+ext  ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+
+
+
+'TITLE'
+sent Ich l ich hab diesen Prospekt bekommen von der Frau Professor wie heißt sie
+True ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-TITLE', 'B-TITLE', 'O', 'O', 'O']
+base ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-TITLE', 'B-TITLE', 'O', 'O', 'O']
+ext  ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-TITLE', 'O', 'O', 'O', 'O']

@@ -56,15 +56,45 @@ class Ner(BertForTokenClassification):
         else:
             return logits
 
-def load_train_data(data_dir):
+def load_train_data(data_dir, ext_data_dir:str, output_dir:str, extend_L=False, extend_L_tri=False):
+    if extend_L:
+        with open('{}/cotrain_config.json'.format(ext_data_dir)) as f:
+            config = json.load(f)
+        prefix = config['Prefix']
+    # if extend_L_tri:
+    #     with open('{}/tri_config.json'.format(ext_data_dir)) as f:
+    #         config = json.load(f)
+    #     prefix = config['Prefix']
+
     if "isw" in str(data_dir):
         dataset = "isw"
         logger.info("***** Loading ISW data *****")
-        # Only do train/dev/test split on ISW dataset
-        label_list, num_labels = split_data(data_dir=data_dir)
+        # Only do train/dev/test split on ISW dataset, Do only the very first time...!
+        if extend_L:
+            with open('{}/model_config.json'.format(output_dir)) as f:
+                config = json.load(f)
+            label_list = [label for label in config['label_map'].values()]
+            num_labels = config['num_labels']
+        else:
+            label_list, num_labels = split_data(data_dir=data_dir)
         # Load ISW train data
         sentences = joblib.load('data/train-{}-sentences.pkl'.format(dataset))
         labels = joblib.load('data/train-{}-labels.pkl'.format(dataset))
+        logger.info("Origin de L size: %d ", len(sentences))
+        if extend_L:
+            ext_L_A_sents = joblib.load('{}/{}_ext_L_A_sents.pkl'.format(ext_data_dir, prefix))
+            ext_L_A_labels = joblib.load('{}/{}_ext_L_A_labels.pkl'.format(ext_data_dir, prefix))
+            sentences = sentences + ext_L_A_sents
+            labels = labels + ext_L_A_labels
+            logger.info("---Co-training---: Ext de L_ size: + {} = {}".format(len(ext_L_A_sents), len(sentences)))
+        # if extend_L_tri:
+        #     tri_ext_sents = joblib.load('{}/{}_ext_sents.pkl'.format(ext_data_dir, prefix))
+        #     tri_ext_labels = joblib.load('{}/{}_ext_labels.pkl'.format(ext_data_dir, prefix))
+        #     sentences = sentences + tri_ext_sents
+        #     labels = labels + tri_ext_labels
+        #     # TODO : 1. ISW + teachable of S1 subeset + teachable
+        #     logger.info("---Tri-training---: Ext teachable L_ size: + {} = {}".format(len(tri_ext_sents), len(sentences)))
+
     elif "onto" in str(data_dir):
         dataset = "onto"
         logger.info("***** Loading OntoNote 5.0 train data *****")
@@ -74,17 +104,24 @@ def load_train_data(data_dir):
         # Load Onto train data
         sentences = pre.sentences
         labels = pre.labels
+        logger.info("Origin en L size: %d", len(sentences))
+        if extend_L:
+            ext_L_B_sents = joblib.load('{}/{}_ext_L_B_sents.pkl'.format(ext_data_dir, prefix))
+            ext_L_B_labels = joblib.load('{}/{}_ext_L_B_labels.pkl'.format(ext_data_dir, prefix))
+            sentences = sentences + ext_L_B_sents
+            labels = labels + ext_L_B_labels
+            logger.info("Ext en L_ size: + {} = {}".format(len(ext_L_B_sents), len(sentences)))
 
     return label_list, num_labels, sentences, labels
 
 def main():
     parser = argparse.ArgumentParser()
 
-    ## Required parameters
+    ## Main parameters
     parser.add_argument("--data_dir",
                         default='data/full-isw-release.tsv',
                         type=str,
-                        required=True,
+                        required=False,
                         help="The input data dir. Should contain the .tsv files (or other data files) for the task.")
     parser.add_argument("--bert_model", default="bert-base-german-cased", type=str, required=False,
                         help="Bert pre-trained model selected in the list: bert-base-uncased, "
@@ -98,8 +135,19 @@ def main():
     parser.add_argument("--output_dir",
                         default='models/',
                         type=str,
-                        required=True,
+                        required=False,
                         help="The output directory where the model predictions and checkpoints will be written.")
+    parser.add_argument("--eval_dir",
+                        default="/",
+                        help="If specified, the eval result will save into this dir, i.e. used for monitoring the tri-training result.")
+    parser.add_argument("--it_prefix",
+                        default="",
+                        type=str,
+                        help="The prefix for monitoring eval results of tri-training, in the format of it-subset, 1_s1")
+    parser.add_argument("--it",
+                        default=0,
+                        type=int,
+                        help="the iteration for tri-training")
 
     ## Other parameters
     parser.add_argument("--cache_dir",
@@ -115,6 +163,27 @@ def main():
     parser.add_argument("--do_train",
                         action='store_true',
                         help="Whether to run training.")
+    # python run_ner.py --data_dir data/full-isw-release.tsv --bert_model bert-base-german-cased --output_dir tri-models/s1_model/ --max_seq_length 128 --do_train --do_subtrain --subtrain_dir sub_data/train-isw-s1.pkl
+    parser.add_argument("--do_subtrain",
+                        action='store_true',
+                        help="Whether to run subtrain on s1, s2 or s3.")
+    parser.add_argument("--subtrain_dir",
+                        default="sub_data/train-isw-s1.pkl",
+                        help="Dir to run sub-training on the s1, s2 or s3 set.")
+    parser.add_argument("--extend_L",
+                        action='store_true',
+                        help="Whether to extend the train set after co-training.")
+    parser.add_argument("--extend_L_tri",
+                        action='store_true',
+                        help="Whether to extend the train set after tri-training.")
+    parser.add_argument("--ext_data_dir",
+                        default='',
+                        type=str,
+                        help="The data directory where the extended dataset is saved.")
+    parser.add_argument("--ext_output_dir",
+                        default='ext_model',
+                        type=str,
+                        help="The output directory where the extended model is saved.")
     parser.add_argument("--do_eval",
                         action='store_true',
                         help="Whether to run eval or not.")
@@ -204,16 +273,51 @@ def main():
     if not args.do_train and not args.do_eval:
         raise ValueError("At least one of `do_train` or `do_eval` must be True.")
 
-    if os.path.exists(args.output_dir) and os.listdir(args.output_dir) and args.do_train:
+    if os.path.exists(args.output_dir) and os.listdir(args.output_dir) and args.do_train and not args.extend_L and not args.extend_L_tri:
         raise ValueError("Output directory ({}) already exists and is not empty.".format(args.output_dir))
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)
+
+    if args.extend_L or args.extend_L_tri:
+        if os.path.exists(args.ext_output_dir) and os.listdir(args.ext_output_dir) and args.do_train:
+            raise ValueError("Ext model output directory ({}) already exists and is not empty.".format(args.ext_output_dir))
+        if not os.path.exists(args.ext_output_dir):
+            os.makedirs(args.ext_output_dir)
 
     task_name = args.task_name.lower()
 
     num_train_optimization_steps = 0
     if args.do_train:
-        label_list, num_labels, sentences, labels = load_train_data(data_dir=args.data_dir)
+        label_list, num_labels, sentences, labels = load_train_data(data_dir=args.data_dir, extend_L=args.extend_L, ext_data_dir=args.ext_data_dir, output_dir=args.output_dir)
+
+        # check if do subset training : s1, s2, s3...
+        if args.do_subtrain:
+            s = joblib.load(args.subtrain_dir)
+            sentences = [sent for (sent, label) in s]
+            labels = [label for (sent, label) in s]
+
+            if args.extend_L_tri:
+                with open('{}/{}_tri_config.json'.format(args.ext_data_dir, args.it)) as f:
+                    config = json.load(f)
+                prefix = config['Prefix']
+
+                logger.info("Origin Student {} L size: {} ".format(args.subtrain_dir,len(sentences)))
+                tri_ext_sents = joblib.load('{}/{}_ext_sents.pkl'.format(args.ext_data_dir, prefix))
+                tri_ext_labels = joblib.load('{}/{}_ext_labels.pkl'.format(args.ext_data_dir, prefix))
+                sentences = sentences + tri_ext_sents
+                labels = labels + tri_ext_labels
+                assert len(sentences) == len(labels)
+                # TODO : 1. ISW + teachable of S1 subeset + teachable
+                logger.info("---Tri-training---: Ext teachable L_ size: + {} = {}".format(len(tri_ext_sents), len(sentences)))
+                if args.subtrain_dir.find("s1") != -1:
+                    prx = "s1"
+                elif args.subtrain_dir.find("s2") != -1:
+                    prx = "s2"
+                else:
+                    prx = "s3"
+                ext_train_set = [(sent, label) for sent, label in zip(sentences, labels)]
+                joblib.dump(ext_train_set, "sub_data/ext-train-isw-{}.pkl".format(prx))
+                logger.info("***** Save ext-train-isw.pkl for next iteration : {} *****".format(prx))
 
         tokenizer = BertTokenizer.from_pretrained(args.bert_model, do_lower_case=args.do_lower_case)
         # train_examples = processor.get_train_examples(args.data_dir)
@@ -314,10 +418,17 @@ def main():
 
         # Save a trained model and the associated configuration
         model_to_save = model.module if hasattr(model, 'module') else model  # Only save the model it-self
-        model_to_save.save_pretrained(args.output_dir)
-        tokenizer.save_pretrained(args.output_dir)
+        if args.extend_L or args.extend_L_tri:
+            output_dir = args.ext_output_dir
+        else:
+            output_dir = args.output_dir
+
+        model_to_save.save_pretrained(output_dir)
+        tokenizer.save_pretrained(output_dir)
+
         label_map = {i : label for i, label in enumerate(label_list,1)}
         model_config = {
+            "num_train_examples":len(sentences),
             "bert_model":args.bert_model,
             "do_lower":args.do_lower_case,
             "train_data_dir":args.data_dir,
@@ -327,21 +438,32 @@ def main():
             "adam_epsilon":args.adam_epsilon,
             "max_grad_norm":args.max_grad_norm,
             "max_seq_length":args.max_seq_length,
-            "output_dir":args.output_dir,
+            "output_dir":output_dir,
             "seed":args.seed,
             "gradient_accumulation_steps":args.gradient_accumulation_steps,
             "num_labels":len(label_list)+1,"label_map":label_map
             }
-        json.dump(model_config,open(os.path.join(args.output_dir,"model_config.json"),"w"))
+        json.dump(model_config,open(os.path.join(output_dir,"model_config.json"),"w"))
+        logger.info("***** Success to save model in dir : {} *****".format(output_dir))
     else:
         # Load a trained model and vocabulary that you have fine-tuned
-        model = Ner.from_pretrained(args.output_dir)
-        tokenizer = BertTokenizer.from_pretrained(args.output_dir, do_lower_case=args.do_lower_case)
+        if args.extend_L or args.extend_L_tri:
+            model = Ner.from_pretrained(args.ext_output_dir)
+            tokenizer = BertTokenizer.from_pretrained(args.ext_output_dir, do_lower_case=args.do_lower_case)
+        else:
+            model = Ner.from_pretrained(args.output_dir)
+            tokenizer = BertTokenizer.from_pretrained(args.output_dir, do_lower_case=args.do_lower_case)
 
     model.to(device)
 
     if args.do_eval and (args.local_rank == -1 or torch.distributed.get_rank() == 0):
-        with open('{}/model_config.json'.format(args.output_dir)) as f:
+        # If we want to eval the ext model, save the eval result to the ext_model dir..
+        if args.extend_L or args.extend_L_tri:
+            output_dir = args.ext_output_dir
+        else:
+            output_dir = args.output_dir
+        
+        with open('{}/model_config.json'.format(output_dir)) as f:
             config = json.load(f)
         label_list = [label for label in config['label_map'].values()]
 
@@ -353,8 +475,8 @@ def main():
                 eval_labels = joblib.load('data/dev-{}-labels.pkl'.format(dataset))
                 eval_label_list = label_list
             elif args.eval_on == "test":
-                eval_sentences = joblib.load('data/test-{}-sentences.pkl'.format(dataset))
-                eval_labels = joblib.load('data/test-{}-labels.pkl'.format(dataset))
+                eval_sentences = joblib.load('data/30-test-{}-sentences.pkl'.format(dataset))
+                eval_labels = joblib.load('data/30-test-{}-labels.pkl'.format(dataset))
                 eval_label_list = label_list
             else:
                 raise ValueError("eval on dev or test set only")
@@ -431,10 +553,18 @@ def main():
         
         report = classification_report(y_true, y_pred, digits=4)
         logger.info("\n%s", report)
-        output_eval_file = os.path.join(args.output_dir, "{}_results.txt".format(args.eval_on))
-        with open(output_eval_file, "w") as writer:
-            logger.info("***** Save the results to {}: {}_results.txt *****".format(args.output_dir, args.eval_on))
-            writer.write(report)
+        if args.eval_dir != "/":
+            if not os.path.exists(args.eval_dir):
+                os.makedirs(args.eval_dir)
+            output_eval_file = os.path.join(args.eval_dir, "{}_{}_results.txt".format(args.it_prefix ,args.eval_on))
+            with open(output_eval_file, "w") as writer:
+                logger.info("***** Save the results to {}: {}_{}_results.txt *****".format(args.eval_dir, args.it_prefix, args.eval_on))
+                writer.write(report)
+        else:
+            output_eval_file = os.path.join(output_dir, "{}_results.txt".format(args.eval_on))
+            with open(output_eval_file, "w") as writer:
+                logger.info("***** Save the results to {}: {}_results.txt *****".format(output_dir, args.eval_on))
+                writer.write(report)
 
 
 if __name__ == "__main__":

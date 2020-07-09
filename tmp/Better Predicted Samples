@@ -1,0 +1,195 @@
+Better Predicted Samples
+
+{'ART': {'before': 0.3529, 'after': 0.3673},
+ 'CARDINAL': {'before': 0.8283, 'after': 0.8387},
+ 'DATE': {'before': 0.7697, 'after': 0.7921},
+ 'DUR': {'before': 0.6667, 'after': 0.6715},
+ 'EVT': {'before': 0.8364, 'after': 0.8649},
+ 'FAC': {'before': 0.7602, 'after': 0.7882},
+ 'FREQ': {'before': 0.7962, 'after': 0.8078},
+ 'GPE': {'before': 0.9696, 'after': 0.9737},
+ 'LOC': {'before': 0.7115, 'after': 0.7193},
+ 'MON': {'before': 0.8421, 'after': 0.8889},
+ 'NRP': {'before': 0.9183, 'after': 0.9212},
+ 'QUANT': {'before': 0.7368, 'after': 0.9474},
+ 'RATE': {'before': 0.0, 'after': 0.3333},
+ 'TIME': {'before': 0.8839, 'after': 0.8906}}
+
+
+'ART'
+sent    LACHEN Ich kann mich noch heute erinnern wie am Abend da waren 40 Kinder da hat man ihnen noch etwas erzählen müssen und da hab ich eine alte Ausgabe von der Odyssee Deutsch denn Hebräisch hab ich noch nicht so gut lesen können dann hab ich das Deutsch gelesen und in mein Hebräisch übersetzt
+True Tag['O', 'O', 'O', 'O', 'O', 'B-TIME', 'O', 'O', 'O', 'B-TIME', 'O', 'O', 'B-CARDINAL', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-ART', 'B-LAN', 'O', 'B-LAN', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-TIME', 'O', 'O', 'O', 'B-LAN', 'O', 'O', 'O', 'O', 'B-LAN', 'O']
+baseline['O', 'O', 'O', 'O', 'O', 'B-TIME', 'O', 'O', 'O', 'B-TIME', 'O', 'O', 'B-CARDINAL', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-EVT', 'B-LAN', 'O', 'B-LAN', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-TIME', 'O', 'O', 'O', 'B-LAN', 'O', 'O', 'O', 'O', 'B-LAN', 'O']
+ext_tag ['O', 'O', 'O', 'O', 'O', 'B-TIME', 'O', 'O', 'O', 'B-TIME', 'O', 'O', 'B-CARDINAL', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-ART', 'B-LAN', 'O', 'B-LAN', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-TIME', 'O', 'O', 'O', 'B-LAN', 'O', 'O', 'O', 'O', 'B-LAN', 'O']
+
+
+
+'CARDINAL'
+sent Die waren eine große Gruppe sie waren sechzig wir waren nur achtzehn
+True ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-CARDINAL', 'O', 'O', 'O', 'B-CARDINAL']
+base ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-AGE', 'O', 'O', 'O', 'B-AGE']
+ext  ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-CARDINAL', 'O', 'O', 'O', 'B-CARDINAL']
+
+sent LACHT Und wir haben wirklich von Null begonnen
+True ['O', 'O', 'O', 'O', 'O', 'O', 'B-CARDINAL', 'O']
+base ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+ext  ['O', 'O', 'O', 'O', 'O', 'O', 'B-CARDINAL', 'O']
+
+sent Die waren eine große Gruppe sie waren sechzig wir waren nur achtzehn
+True ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-CARDINAL', 'O', 'O', 'O', 'B-CARDINAL']
+base ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-AGE', 'O', 'O', 'O', 'B-AGE']
+ext  ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-CARDINAL', 'O', 'O', 'O', 'B-CARDINAL']
+
+
+
+'DATE'
+sent Aber ich mein in größeren Massen kann man sagen dass der ökonomische Faktor erst im 20
+True ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-DATE']
+base ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-GPE']
+ext  ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-DATE']
+
+sent Weihnachten sind wir angekommen in in 38
+True ['B-DATE', 'O', 'O', 'O', 'O', 'O', 'B-DATE']
+base ['B-DATE', 'O', 'O', 'O', 'O', 'O', 'B-GPE']
+ext  ['B-DATE', 'O', 'O', 'O', 'O', 'O', 'B-DATE']
+
+
+
+'DUR'
+sent Das heißt innerhalb von zwei drei Jahren jedes Mal wird er zwei Wochen eingeladen und äh man wird auch soziale Verbindungen mit ihm äh wieder herstellen wollen und so weiter weit Nichts geworden draus
+True ['O', 'O', 'O', 'O', 'B-DUR', 'B-DUR', 'I-DUR', 'B-FREQ', 'I-FREQ', 'O', 'O', 'B-DUR', 'I-DUR', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+base ['O', 'O', 'O', 'O', 'I-FREQ', 'I-FREQ', 'I-FREQ', 'B-FREQ', 'I-FREQ', 'O', 'O', 'B-DUR', 'I-DUR', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+ext  ['O', 'O', 'O', 'O', 'B-DUR', 'B-DUR', 'I-DUR', 'B-FREQ', 'I-FREQ', 'O', 'O', 'B-DUR', 'I-DUR', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+
+sent Das war immer so gewesen dass verschiedene Christen haben ihren eigenen Juden gehabt
+True ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-NRP', 'O', 'O', 'O', 'B-NRP', 'O']
+base ['O', 'O', 'B-DUR', 'O', 'O', 'O', 'O', 'B-NRP', 'O', 'O', 'O', 'B-NRP', 'O']
+ext  ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-NRP', 'O', 'O', 'O', 'B-NRP', 'O']
+
+sent Das war immer so gewesen dass verschiedene Christen haben ihren eigenen Juden gehabt
+True ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-NRP', 'O', 'O', 'O', 'B-NRP', 'O']
+base ['O', 'O', 'B-DUR', 'O', 'O', 'O', 'O', 'B-NRP', 'O', 'O', 'O', 'B-NRP', 'O']
+ext  ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-NRP', 'O', 'O', 'O', 'B-NRP', 'O']
+
+
+
+'EVT'
+sent In Rumänien waren Sie dann auf Hachschara
+True ['O', 'B-GPE', 'O', 'O', 'B-TIME', 'O', 'B-EVT']
+base ['O', 'B-GPE', 'O', 'O', 'B-TIME', 'O', 'B-LOC']
+ext  ['O', 'B-GPE', 'O', 'O', 'B-TIME', 'O', 'B-EVT']
+
+sent Und dort waren wir auf Hachschara eine Gruppe von Jugend die sich vorbereitet auf das Land mit Landwirtschaft usw
+True ['O', 'O', 'O', 'O', 'O', 'B-EVT', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+base ['O', 'O', 'O', 'O', 'O', 'B-LOC', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+ext  ['O', 'O', 'O', 'O', 'O', 'B-EVT', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+
+
+
+'FAC'
+sent Obwohl ich sag immer ich Sie wissen was die ist die Westmauer Aso
+True ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LOC', 'O']
+base ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-FAC', 'O']
+ext  ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LOC', 'O']
+
+sent Ich wollt grad sagen des Ich war in dem Hotel wie hat das geheißen ein schönes Hotel in der Hauptstraße ein altes Gebäude sieht aus wie eine eingefallene Burg
+True ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-FAC', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+base ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+ext  ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-FAC', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+
+
+
+'FREQ'
+sent Und ich wunder mich immer die Leute sind so nett und freundlich und und höflich und wirklich ich kann nichts Schlechtes sagen und dann überleg ich mir wie ist das möglich nicht dass es dieselben Leute sind das sind eine andere Generation aber dasselbe Volk wenn ich mir vorstelle was für ein Jubel was für eine Begeisterung das kann ich einfach nicht begreifen Aber Sie geben der heutigen Generation keine Schuld oder irgendwas
+True ['O', 'O', 'O', 'O', 'B-FREQ', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-TIME', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-TIME', 'O', 'O', 'O', 'O', 'O']
+base ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-TIME', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-TIME', 'O', 'O', 'O', 'O', 'O']
+ext  ['O', 'O', 'O', 'O', 'B-FREQ', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-TIME', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-TIME', 'O', 'O', 'O', 'O', 'O']
+
+sent Es gab nicht viel dort zu essen mein Mann war beim Militär und pflegte mir so paar Happen in seiner Tasche von seinem Frühstück nach Hause zu bringen LACHT und äh hat immer gesagt Du wirst sehen wenn die wenn das Kind auf die Welt kommt wird schon Frieden sein
+True ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-FREQ', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+base ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+ext  ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-FREQ', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+
+
+
+
+'GPE'
+sent Ich hab geglaubt dass Bernstein nach Australien gegangen ist oder dass er in Auschwitz umgekommen ist oder Auschwitz oder Treblinka
+True ['O', 'O', 'O', 'O', 'B-PER', 'O', 'B-GPE', 'O', 'O', 'O', 'O', 'O', 'O', 'B-FAC', 'O', 'O', 'O', 'B-FAC', 'O', 'B-FAC']
+base ['O', 'O', 'O', 'O', 'B-PER', 'O', 'B-GPE', 'O', 'O', 'O', 'O', 'O', 'O', 'B-FAC', 'O', 'O', 'O', 'B-FAC', 'O', 'B-GPE']
+ext  ['O', 'O', 'O', 'O', 'B-PER', 'O', 'B-GPE', 'O', 'O', 'O', 'O', 'O', 'O', 'B-FAC', 'O', 'O', 'O', 'B-FAC', 'O', 'B-FAC']
+
+sent Die Kinder hatten jeder ein eigenes Mansardenzimmer das war sehr schön schöne Wohnung in der deutschen Kolonie
+True ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-NRP', 'O']
+base ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-NRP', 'I-GPE']
+ext  ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-NRP', 'O']
+
+sent Der Vater war ein Mitglied von einer Gruppe die einen Kibbuz hier gegründet hat Geva Sie kennen
+True ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-GPE', 'O', 'O']
+base ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-PER', 'O', 'O']
+ext  ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-GPE', 'O', 'O']
+
+
+
+'MON'
+sent ES KLOPFT AN DER TÜR GABY KOMMT ZU BESUCH Weil die Österreicher einfach nicht erlauben dass man 2 Shalom ZU GABY Gaby komm komm
+True ['O', 'O', 'O', 'O', 'O', 'B-PER', 'O', 'O', 'O', 'O', 'O', 'B-NRP', 'O', 'O', 'O', 'O', 'O', 'B-CARDINAL', 'O', 'O', 'B-PER', 'B-PER', 'O', 'O']
+base ['O', 'O', 'O', 'O', 'O', 'B-PER', 'O', 'O', 'O', 'O', 'O', 'B-NRP', 'O', 'O', 'O', 'O', 'O', 'B-CARDINAL', 'I-MON', 'O', 'B-PER', 'B-PER', 'O', 'O']
+ext  ['O', 'O', 'O', 'O', 'O', 'B-PER', 'O', 'O', 'O', 'O', 'O', 'B-NRP', 'O', 'O', 'O', 'O', 'O', 'B-CARDINAL', 'O', 'O', 'B-PER', 'B-PER', 'O', 'O']
+
+
+
+'NRP'
+sent Wir haben die christlichen Feiertage auch nicht mitgefeiert aber mitgenossen
+True ['O', 'O', 'O', 'B-NRP', 'O', 'O', 'O', 'O', 'O', 'O']
+base ['O', 'O', 'O', 'B-DATE', 'I-DATE', 'O', 'O', 'O', 'O', 'O']
+ext  ['O', 'O', 'O', 'B-NRP', 'O', 'O', 'O', 'O', 'O', 'O']
+
+sent es war ein Pass dass die Leute die auf diesem Die haben einem unter der Beschützung vom schwedischen Staat sind sie dem Weg nach ins Ausland usw
+True ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-NRP', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+base ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-GPE', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+ext  ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-NRP', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+
+sent Das heißt es geht um einen Antisemitismus der nicht äh sozusagen religiös begründet war
+True ['O', 'O', 'O', 'O', 'O', 'O', 'B-NRP', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+base ['O', 'O', 'O', 'O', 'O', 'O', 'B-NRP', 'O', 'O', 'O', 'O', 'B-NRP', 'O', 'O']
+ext  ['O', 'O', 'O', 'O', 'O', 'O', 'B-NRP', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+
+
+
+'QUANT'
+sent    Jetzt ist es heute auch wieder damals war es an der Grenze und und haben sie Riesenfenster und es gibt glaube ich auch ein paar Sandsäcke in der Höhe von einem halben Meter um irgendwie Schutz zu geben
+True Tag['B-TIME', 'O', 'O', 'B-DATE', 'O', 'O', 'B-TIME', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-QUANT', 'I-QUANT', 'O', 'O', 'O', 'O', 'O']
+baseline['B-TIME', 'O', 'O', 'B-DATE', 'O', 'B-SORD', 'B-TIME', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'I-QUANT', 'I-QUANT', 'O', 'O', 'O', 'O', 'O']
+ext_tag ['B-TIME', 'O', 'O', 'B-DATE', 'O', 'B-SORD', 'B-TIME', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-QUANT', 'I-QUANT', 'O', 'O', 'O', 'O', 'O']
+
+sent    Sie wurden unter 5 6 10 Grad Kälte ins Freie gerufen zu einem Appell nackt mit kaltem Wasser übergossen
+True Tag['O', 'O', 'O', 'B-QUANT', 'B-QUANT', 'B-QUANT', 'I-QUANT', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+baseline['O', 'O', 'O', 'B-QUANT', 'B-QUANT', 'I-QUANT', 'I-QUANT', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+ext_tag ['O', 'O', 'O', 'B-QUANT', 'B-QUANT', 'B-QUANT', 'I-QUANT', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+
+
+
+'RATE'
+sent    Und die Viele Leute sind umgekommen beim Anstellen um d zwei Liter Wasser die man pro Tag bekommen hat
+True Tag['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-QUANT', 'I-QUANT', 'O', 'B-RATE', 'O', 'I-RATE', 'I-RATE', 'O', 'O']
+baseline['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-QUANT', 'I-QUANT', 'O', 'O', 'O', 'I-RATE', 'I-FREQ', 'O', 'O']
+ext_tag ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-QUANT', 'I-QUANT', 'O', 'O', 'O', 'I-RATE', 'I-RATE', 'O', 'O']
+
+
+
+'TIME'
+sent Nicht so wie ich es wahrscheinlich hätte können wenn ich wenn ich in der Sprache weiter gelebt hätte nicht wir haben äh äh sehr viele äh Worte die in die Sprache hineingekommen sind wir wir wechseln äh geben mal ein hebräisches Wort herein und mal ein englisches
+True ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-TIME', 'O', 'B-LAN', 'O', 'O', 'O', 'B-TIME', 'O', 'B-LAN']
+base ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LAN', 'O', 'O', 'O', 'O', 'O', 'B-LAN']
+ext  ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-TIME', 'O', 'B-LAN', 'O', 'O', 'O', 'B-TIME', 'O', 'B-LAN']
+
+sent Und wenn er herkommt dann äh ist er wirklich nicht fremd denn er ist in der Sprache und äh das ist für ihn sehr schön
+True ['O', 'O', 'O', 'O', 'B-TIME', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+base ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+ext  ['O', 'O', 'O', 'O', 'B-TIME', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+
+sent Niemals hab ich es geschafft für den Preis zu kaufen den ich einverstanden war es zu kaufen
+True ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+base ['B-TIME', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+ext  ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
