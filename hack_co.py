@@ -30,8 +30,8 @@ def main():
         for k in k_ls:
             logger.info(" ***** Iteration k : {} ***** ".format(k))
             ext_output_data_dir = "ext_data/ext_k_{}".format(k)
-            if os.path.exists(args.ext_output_data_dir) and os.listdir(args.ext_output_data_dir):
-                raise ValueError("Output directory ({}) already exists and is not empty.".format(args.ext_output_data_dir))
+            if os.path.exists(ext_output_data_dir) and os.listdir(ext_output_data_dir):
+                raise ValueError("Output directory ({}) already exists and is not empty.".format(ext_output_data_dir))
             else:
                 logger.info(" ***** Selecting ext_data ***** ")
                 script = "python run_cotrain.py --ext_output_dir {} --modelA_dir baseline_model --modelB_dir onto_model --de_unlabel_dir machine_translation/2017_de_sents.txt --en_unlabel_dir machine_translation/2017_en_sents.txt --k {} --u 200 --top_n 10 --save_preds --save_agree".format(ext_output_data_dir, k)
