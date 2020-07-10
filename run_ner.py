@@ -133,7 +133,7 @@ def main():
                         required=False,
                         help="The name of the task to train.")
     parser.add_argument("--output_dir",
-                        default='models/',
+                        default='baseline_model/',
                         type=str,
                         required=False,
                         help="The output directory where the model predictions and checkpoints will be written.")
