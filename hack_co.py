@@ -26,7 +26,7 @@ def main():
 
     if args.tune_iteration_k:
         logger.info(" ***** Start Co-training, tuning iteration k ***** ")
-        k_ls = [500, 1000, 1500, 2000, 2500]
+        k_ls = [200, 500, 1000, 1200, 1500]
         for k in k_ls:
             logger.info(" ***** Iteration k : {} ***** ".format(k))
             ext_output_data_dir = "ext_data/ext_k_{}".format(k)
