@@ -78,8 +78,12 @@ def load_train_data(data_dir, ext_data_dir:str, output_dir:str, extend_L=False, 
         else:
             label_list, num_labels = split_data(data_dir=data_dir)
         # Load ISW train data
-        sentences = joblib.load('data/train-{}-sentences.pkl'.format(dataset))
-        labels = joblib.load('data/train-{}-labels.pkl'.format(dataset))
+        # sentences = joblib.load('data/train-{}-sentences.pkl'.format(dataset))
+        # labels = joblib.load('data/train-{}-labels.pkl'.format(dataset))
+        s = joblib.load('small_data/train-isw-s1.pkl')
+        sentences = [sent for (sent, label) in s]
+        labels = [label for (sent, label) in s]
+        
         logger.info("Origin de L size: %d ", len(sentences))
         if extend_L:
             ext_L_A_sents = joblib.load('{}/{}_ext_L_A_sents.pkl'.format(ext_data_dir, prefix))
