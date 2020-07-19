@@ -34,7 +34,7 @@ def main():
                 pass
             else:
                 logger.info(" ***** Selecting ext_data ***** ")
-                script = "python run_cotrain.py --ext_output_dir {} --modelA_dir baseline_model --modelB_dir onto_model --de_unlabel_dir machine_translation/2017_de_sents.txt --en_unlabel_dir machine_translation/2017_en_sents.txt --k {} --u 200 --top_n 10 --save_preds --save_agree".format(ext_output_data_dir, k)
+                script = "python run_cotrain.py --ext_output_dir {} --modelA_dir small-models --modelB_dir onto_model --de_unlabel_dir machine_translation/2017_de_sents.txt --en_unlabel_dir machine_translation/2017_en_sents.txt --k {} --u 200 --top_n 10 --save_preds --save_agree".format(ext_output_data_dir, k)
                 os.system(script)
                 logger.info(" ***** Ext data saved in : {} ***** ".format(ext_output_data_dir))
 
@@ -61,7 +61,7 @@ def main():
                 pass
             else:
                 logger.info(" ***** Selecting ext_data ***** ")
-                script = "python run_cotrain.py --ext_output_dir {} --modelA_dir baseline_model --modelB_dir onto_model --de_unlabel_dir machine_translation/2017_de_sents.txt --en_unlabel_dir machine_translation/2017_en_sents.txt --k 1000 --u 200 --top_n {} --save_preds --save_agree".format(ext_output_data_dir, t)
+                script = "python run_cotrain.py --ext_output_dir {} --modelA_dir small-models --modelB_dir onto_model --de_unlabel_dir machine_translation/2017_de_sents.txt --en_unlabel_dir machine_translation/2017_en_sents.txt --k 1000 --u 200 --top_n {} --save_preds --save_agree".format(ext_output_data_dir, t)
                 os.system(script)
                 logger.info(" ***** Ext data saved in : {} ***** ".format(ext_output_data_dir))
 
@@ -88,7 +88,7 @@ def main():
                 pass
             else:
                 logger.info(" ***** Selecting ext_data ***** ")
-                script = "python run_cotrain.py --ext_output_dir {} --modelA_dir baseline_model --modelB_dir onto_model --de_unlabel_dir machine_translation/2017_de_sents.txt --en_unlabel_dir machine_translation/2017_en_sents.txt --k 1000 --u {} --top_n 10 --save_preds --save_agree".format(ext_output_data_dir, u)
+                script = "python run_cotrain.py --ext_output_dir {} --modelA_dir small-models --modelB_dir onto_model --de_unlabel_dir machine_translation/2017_de_sents.txt --en_unlabel_dir machine_translation/2017_en_sents.txt --k 1000 --u {} --top_n 10 --save_preds --save_agree".format(ext_output_data_dir, u)
                 os.system(script)
                 logger.info(" ***** Ext data saved in : {} ***** ".format(ext_output_data_dir))
 
