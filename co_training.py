@@ -5,6 +5,7 @@ import joblib
 import html
 import re
 import json
+import random
 from predict import Ner
 from run_ner import load_train_data
 
@@ -59,6 +60,8 @@ class CoTraining:
 			sent=sent.strip()
 			sent=html.unescape(sent)
 			sentences.append((i, sent)) 
+		# Shuffle the unlabeled set, to ensure that we get different set of instances
+		random.shuffle(sentences)
 		return sentences
 
 	def get_confident_preds(self, clf, unlabel_dir, model_dir, save_preds=False):

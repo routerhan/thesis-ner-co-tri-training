@@ -41,17 +41,42 @@ def get_random_baselines(n_trials=5):
         eval_script = "python run_ner.py --output_dir random-baseline/trial{}_model/ --do_eval --eval_on test --eval_dir random-baseline/eval_monitor/ --it_prefix {}".format(i, i)
         os.system(eval_script)
 
+# Get Co-Train result with fix amount of unlabeled samples setting, u=200,000
+def get_random_co_train_result_fix_u(n_trials = 5):
+    for i in range(n_trials):
+        logger.info(" ***** Selecting ext_data, trial:{}***** ".format(i))
+        ext_output_data_dir = "random-co-train/co-ext-data/ext-data-t{}".format(i)
+        data_script = "python run_cotrain.py --ext_output_dir {} --modelA_dir small-models --modelB_dir onto_model --de_unlabel_dir machine_translation/2017_de_sents.txt --en_unlabel_dir machine_translation/2017_en_sents.txt --k 1000 --u 200 --top_n 20 --save_preds --save_agree".format(ext_output_data_dir)
+        os.system(data_script)
+
+        logger.info(" ***** Start re-train on ext_data, trial:{} ***** ".format(i))
+        ext_output_model_dir = "random-co-train/co-ext-models/ext-model-t{}".format(i)
+        train_script = "python run_ner.py --max_seq_length 128 --do_train --extend_L --ext_data_dir {} --ext_output_dir {}".format(ext_output_data_dir, ext_output_model_dir)
+        os.system(train_script)
+
+        logger.info(" ***** Evaluate new re-train model, trial:{} ***** ".format(i))
+        eval_script = "python run_ner.py --output_dir {} --do_eval --eval_on test --eval_dir random-co-train/eval_monitor/ --it_prefix {}".format(ext_output_model_dir, i)
+        os.system(eval_script)
+
+
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--get_random_baselines",
                     action='store_true',
                     help="Whether to train trials baseline model trained on random selected train set")
+    parser.add_argument("--get_random_co_train_result_fix_u",
+                    action='store_true',
+                    help="Whether to train trials co-models with fix amount of unlabeled samples")
     args = parser.parse_args()
 
     if args.get_random_baselines:
         logger.info(" ***** 1. Pre : Getting random baseline ***** ")
         get_random_baselines(n_trials=5)
+
+    if args.get_random_co_train_result_fix_u:
+        logger.info(" ***** 2. Pre : Getting random co-models with fix u = 200,000 ***** ")
+        get_random_co_train_result_fix_u(n_trials=5)
 
 
 if __name__ == '__main__':
