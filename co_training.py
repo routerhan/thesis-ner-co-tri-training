@@ -45,7 +45,7 @@ class CoTraining:
 		self.modelB_dir = modelB_dir
 
 		# Cosine similarity score threshold for the level of agreement.
-		self.cos_score_threshold = 0.7
+		self.cos_score_threshold = 0.9
 
 	# Load txt file as: 1. de_sents.txt, 2. en_sents.txt ..
 	def prep_unlabeled_set(self, unlabel_dir):

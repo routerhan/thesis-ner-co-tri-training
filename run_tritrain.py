@@ -29,7 +29,7 @@ def main():
                         type=int,
                         help="The pool value of U, to limit the amount of unlabeled samples to use.")
     parser.add_argument("--cos_score_threshold",
-                        default=0.7,
+                        default=0.9,
                         type=float,
                         help="The similarity socre threshold to check identicality of sequance labeling task.")
     parser.add_argument("--mi_dir",
