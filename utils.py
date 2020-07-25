@@ -112,7 +112,7 @@ def get_hyperparameters(model, ff):
 
     return optimizer_grouped_parameters
 
-def random_subsample_replacement(r=0.7, dataset="isw"):
+def random_subsample_replacement(r=0.3, dataset="isw"):
     """
     sampling with replacement, i.e. sampling 70% origin isw-train with replacement.
     Return : [("Ich bin 12", ['O', 'O', 'QUANT']), (), ...]

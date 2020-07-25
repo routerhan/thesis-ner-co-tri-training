@@ -13,8 +13,8 @@ def get_random_baselines(n_trials=5):
     """Returns
     N random baselines, with its test_results.txt
     """
-    if not os.path.exists("random_baseline/"):
-            os.makedirs("random_baseline/")
+    if not os.path.exists("random-baseline/"):
+            os.makedirs("random-baseline/")
     r = 0.3
     ori_sents = joblib.load('data/train-isw-sentences.pkl')
     ori_labels = joblib.load('data/train-isw-labels.pkl')
@@ -58,6 +58,22 @@ def get_random_co_train_result_fix_u(n_trials = 5):
         eval_script = "python run_ner.py --output_dir {} --do_eval --eval_on test --eval_dir random-co-train/eval_monitor/ --it_prefix {}".format(ext_output_model_dir, i)
         os.system(eval_script)
 
+# Get Tri-Train result with fix amount of unlabeled samples setting, u=200,000
+def get_random_tri_train_result_fix_u(n_trials = 5):
+    logger.info(" ***** Pre :Initializing tri candidates models***** ")
+    pre_script = "python hack_tri.py --do_prerequisite"
+    os.system(pre_script)
+    for i in range(n_trials):
+        logger.info(" ***** Start tri-training, trial:{}***** ".format(i))
+        tri_script = "python hack_tri.py --u 40000 --tcfd_threshold 0.9 --scfd_threshold 0.4 --eval_dir random-tri-train/eval-trial-{}/".format(i)
+        os.system(tri_script)
+
+        rm_script = "rm tri-models/s{1..3}_model/1*.*"
+        os.system(rm_script)
+        rm_script = "rm tri-ext-models/*/*"
+        os.system(rm_script)
+        rm_script = "rmdir tri-ext-models/"
+        os.system(rm_script)
 
 
 def main():
@@ -68,6 +84,9 @@ def main():
     parser.add_argument("--get_random_co_train_result_fix_u",
                     action='store_true',
                     help="Whether to train trials co-models with fix amount of unlabeled samples")
+    parser.add_argument("--get_random_tri_train_result_fix_u",
+                    action='store_true',
+                    help="Whether to train trials tri-models with fix amount of unlabeled samples")
     args = parser.parse_args()
 
     if args.get_random_baselines:
@@ -77,6 +96,10 @@ def main():
     if args.get_random_co_train_result_fix_u:
         logger.info(" ***** 2. Pre : Getting random co-models with fix u = 200,000 ***** ")
         get_random_co_train_result_fix_u(n_trials=5)
+    
+    if args.get_random_tri_train_result_fix_u:
+        logger.info(" ***** 3. Pre : Getting random tri-models with fix u = 200,000 ***** ")
+        get_random_tri_train_result_fix_u(n_trials=5)
 
 
 if __name__ == '__main__':
