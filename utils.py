@@ -1,6 +1,7 @@
 import logging
 import joblib
 import html
+import random
 from random import choices
 from sklearn.model_selection import train_test_split
 from collections import Counter
@@ -144,4 +145,5 @@ def prep_unlabeled_set(unlabel_dir):
         sent=sent.strip()
         sent=html.unescape(sent)
         sentences.append((i, sent)) 
+    random.shuffle(sentences)
     return sentences
