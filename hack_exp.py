@@ -1,5 +1,6 @@
 import os
 import logging
+import json
 import joblib
 import argparse
 from random import choices
@@ -70,13 +71,49 @@ def get_random_tri_train_result_fix_u(n_trials = 5):
 
         rm_script = "rm tri-models/s{1..3}_model/1*.*"
         os.system(rm_script)
-        rm_script = "rm tri-ext-models/{1..4}_ext_s*_model/*"
+        rm_script = "rm tri-ext-models/*/*"
         os.system(rm_script)
-        rm_script = "rm tri-ext-models/5_ext_s{1..2}_model/*"
+        rm_script = "rm sub_data/ext*.pkl"
         os.system(rm_script)
-        rm_script = "rmdir tri-ext-models/"
+        rm_script = "rmdir tri-ext-models/*"
         os.system(rm_script)
 
+# Get Co-Train result with fix amount of selected samples settings, n=[100, 200, 300, 400, 500]
+def get_random_co_train_result_fix_n(n_trials = 5, ext_dir="", ext_sent_dir="", ext_label_dir="", selected_n=500):
+    sents = joblib.load(ext_sent_dir)
+    labels = joblib.load(ext_label_dir)
+
+    # Zip sents and labels
+    train_set = []
+    for sent, label in zip(sents, labels):
+        train_set.append((sent, label))
+    assert len(train_set) == len(sents)
+
+    for i in range(n_trials):
+        # get random selected samples with desired amount
+        random_set = choices(train_set, k=selected_n)
+        sentences = [sent for (sent, label) in random_set]
+        labels = [label for (sent, label) in random_set]
+
+        # Save as pkl file for further re-training
+        joblib.dump(sentences, '{}/{}_ext_L_A_sents.pkl'.format(ext_dir, selected_n))
+        joblib.dump(labels, '{}/{}_ext_L_A_labels.pkl'.format(ext_dir, selected_n))
+
+        # Change the config, for indexing
+        with open("{}/cotrain_config.json".format(ext_dir), "r") as jsonFile:
+            data = json.load(jsonFile)
+        data["Prefix"] = selected_n
+        with open("{}/cotrain.json".format(ext_dir), "w") as jsonFile:
+            json.dump(data, jsonFile)
+
+        logger.info(" ***** Start re-train on ext_data, trial:{} ***** ".format(i))
+        ext_output_model_dir = "random-co-train/co-ext-models-fix-n-{}/ext-model-t{}".format(selected_n, i)
+        train_script = "python run_ner.py --max_seq_length 128 --do_train --extend_L --ext_data_dir {} --ext_output_dir {}".format(ext_dir, ext_output_model_dir)
+        os.system(train_script)
+
+        logger.info(" ***** Evaluate new re-train model, trial:{} ***** ".format(i))
+        eval_script = "python run_ner.py --output_dir {} --do_eval --eval_on test --eval_dir random-co-train/eval_monitor-fix-n-{}/ --it_prefix {}".format(ext_output_model_dir, selected_n, i)
+        os.system(eval_script)
 
 def main():
     parser = argparse.ArgumentParser()
