@@ -70,7 +70,9 @@ def get_random_tri_train_result_fix_u(n_trials = 5):
 
         rm_script = "rm tri-models/s{1..3}_model/1*.*"
         os.system(rm_script)
-        rm_script = "rm tri-ext-models/*/*"
+        rm_script = "rm tri-ext-models/{1..4}_ext_s*_model/*"
+        os.system(rm_script)
+        rm_script = "rm tri-ext-models/5_ext_s{1..2}_model/*"
         os.system(rm_script)
         rm_script = "rmdir tri-ext-models/"
         os.system(rm_script)
