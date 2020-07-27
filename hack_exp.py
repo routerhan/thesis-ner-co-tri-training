@@ -115,6 +115,31 @@ def get_random_co_train_result_fix_n(n_trials = 5, ext_dir="", ext_sent_dir="", 
         eval_script = "python run_ner.py --output_dir {} --do_eval --eval_on test --eval_dir random-co-train/eval_monitor-fix-n-{}/ --it_prefix {}".format(ext_output_model_dir, selected_n, i)
         os.system(eval_script)
 
+# Get Tri-Train result with fix amount of selected samples settings, n=[100, 200, 300, 400, 500]
+def get_random_tri_train_result_fix_n(n_trials = 5, ext_dir="", ori_dir="", selected_n=500):
+    ori = joblib.load(ori_dir)
+    ext_all = joblib.load(ext_dir)
+    amount_ext = len(ext_all)-len(ori)
+
+    ext = ext_all[-amount_ext:]
+
+    for i in range(n_trials):
+        random_set = choices(ext, k=selected_n)
+        # Append random ext data to ori and Save as pkl file for further re-training
+        random_tri_ext = ori + random_set
+        random_tri_ext_dir = "sub_data/random-ext-train-trial-{}.pkl".format(i)
+        assert len(random_tri_ext) == len(ori) + selected_n
+        joblib.dump(random_tri_ext, random_tri_ext_dir)
+
+        # Retrain with fix amount of selected samples
+        ext_output_model_dir = "random-tri-train/tri-ext-models-fix-n-{}/ext-model-t{}".format(selected_n, i)
+        train_script = "python run_ner.py --output_dir {} --max_seq_length 128 --do_train --do_subtrain --subtrain_dir {}".format(ext_output_model_dir, random_tri_ext_dir)
+        os.system(train_script)
+
+        # Evaluate the re-train model
+        eval_script = "python run_ner.py --output_dir {} --do_eval --eval_on test --eval_dir random-tri-train/eval_monitor-fix-n-{}/ --it_prefix {}".format(ext_output_model_dir, selected_n, i)
+        os.system(eval_script)
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--get_random_baselines",
