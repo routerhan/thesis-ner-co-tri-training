@@ -151,19 +151,23 @@ def main():
     parser.add_argument("--get_random_tri_train_result_fix_u",
                     action='store_true',
                     help="Whether to train trials tri-models with fix amount of unlabeled samples")
+    parser.add_argument("--n_trials",
+                        default=5,
+                        type=int,
+                        help="the number of trials for experiemt")
     args = parser.parse_args()
 
     if args.get_random_baselines:
         logger.info(" ***** 1. Pre : Getting random baseline ***** ")
-        get_random_baselines(n_trials=5)
+        get_random_baselines(n_trials=args.n_trials)
 
     if args.get_random_co_train_result_fix_u:
         logger.info(" ***** 2. Pre : Getting random co-models with fix u = 200,000 ***** ")
-        get_random_co_train_result_fix_u(n_trials=5)
+        get_random_co_train_result_fix_u(n_trials=args.n_trials)
     
     if args.get_random_tri_train_result_fix_u:
         logger.info(" ***** 3. Pre : Getting random tri-models with fix u = 200,000 ***** ")
-        get_random_tri_train_result_fix_u(n_trials=5)
+        get_random_tri_train_result_fix_u(n_trials=args.n_trials)
 
 
 if __name__ == '__main__':
