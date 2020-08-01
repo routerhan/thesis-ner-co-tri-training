@@ -103,7 +103,7 @@ def get_random_co_train_result_fix_n(n_trials = 5, ext_dir="", ext_sent_dir="", 
         with open("{}/cotrain_config.json".format(ext_dir), "r") as jsonFile:
             data = json.load(jsonFile)
         data["Prefix"] = selected_n
-        with open("{}/cotrain.json".format(ext_dir), "w") as jsonFile:
+        with open("{}/cotrain_config.json".format(ext_dir), "w") as jsonFile:
             json.dump(data, jsonFile)
 
         logger.info(" ***** Start re-train on ext_data, trial:{} ***** ".format(i))
