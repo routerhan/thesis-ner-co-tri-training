@@ -154,6 +154,9 @@ def main():
     parser.add_argument("--get_random_co_train_result_fix_n",
                     action='store_true',
                     help="Whether to train trials co-models with fix amount of selected samples")
+    parser.add_argument("--get_random_tri_train_result_fix_n",
+                    action='store_true',
+                    help="Whether to train trials tri-models with fix amount of selected samples")
     parser.add_argument("--n_trials",
                         default=5,
                         type=int,
@@ -177,8 +180,12 @@ def main():
         get_random_tri_train_result_fix_u(n_trials=args.n_trials)
 
     if args.get_random_co_train_result_fix_n:
-        logger.info(" ***** 4. Pre : Getting random tri-models with fix n = {} ***** ".format(args.selected_n))
+        logger.info(" ***** 4. Pre : Getting random co-models with fix n = {} ***** ".format(args.selected_n))
         get_random_co_train_result_fix_n(n_trials=args.n_trials, ext_dir="random-co-train/co-ext-data/ext-data-t1/", ext_sent_dir="random-co-train/co-ext-data/ext-data-t1/1468_ext_L_A_sents.pkl", ext_label_dir="random-co-train/co-ext-data/ext-data-t1/1468_ext_L_A_labels.pkl", selected_n=args.selected_n)
+
+    if args.get_random_tri_train_result_fix_n:
+        logger.info(" ***** 5. Pre : Getting random tri-models with fix n = {} ***** ".format(args.selected_n))
+        get_random_tri_train_result_fix_n(n_trials=args.n_trials, ext_dir="sub_data/ext-train-isw-s2.pkl", ori_dir="sub_data/train-isw-s2.pkl", selected_n=args.selected_n)
 
 
 if __name__ == '__main__':
