@@ -1,6 +1,7 @@
 import logging
 import joblib
 import html
+import random
 from random import choices
 from sklearn.model_selection import train_test_split
 from collections import Counter
@@ -112,7 +113,7 @@ def get_hyperparameters(model, ff):
 
     return optimizer_grouped_parameters
 
-def random_subsample_replacement(r=0.7, dataset="isw"):
+def random_subsample_replacement(r=0.3, dataset="isw"):
     """
     sampling with replacement, i.e. sampling 70% origin isw-train with replacement.
     Return : [("Ich bin 12", ['O', 'O', 'QUANT']), (), ...]
@@ -144,4 +145,5 @@ def prep_unlabeled_set(unlabel_dir):
         sent=sent.strip()
         sent=html.unescape(sent)
         sentences.append((i, sent)) 
+    random.shuffle(sentences)
     return sentences

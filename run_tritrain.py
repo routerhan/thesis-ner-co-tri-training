@@ -69,6 +69,10 @@ def main():
                         default='sub_data/',
                         type=str,
                         help="The dir that you save the sub-samples of L set.")
+    parser.add_argument("--eval_dir",
+                        default='"tri-models/eval_monitor/"',
+                        type=str,
+                        help="The dir that you save the eval of meta-tri-models.")
     parser.add_argument("--r",
                         default=0.7,
                         type=float,
@@ -101,7 +105,7 @@ def main():
         logger.info(" ***** Start Tri-training ***** ")
         # Start tri-training : save teachable samples
         tri_train = TriTraining(U=args.U, u=args.u, mi_dir=args.mi_dir, mj_dir=args.mj_dir, mk_dir=args.mk_dir, tcfd_threshold=args.tcfd_threshold, scfd_threshold=args.scfd_threshold, r_t=args.r_t, r_s=args.r_s, cos_score_threshold=args.cos_score_threshold)
-        tri_train.fit()
+        tri_train.fit(eval_dir=args.eval_dir)
 
 if __name__ == '__main__':
     main()

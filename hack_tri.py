@@ -24,7 +24,10 @@ def main():
                         default=0.5,
                         type=float,
                         help="the scfd_threshold for tri-training")
-    
+    parser.add_argument("--eval_dir",
+                    default='"tri-models/eval_monitor/"',
+                    type=str,
+                    help="The dir that you save the eval of meta-tri-models.")
     args = parser.parse_args()
 
     if args.do_prerequisite:
@@ -44,7 +47,7 @@ def main():
             os.system(script)
     else:
         logger.info(" ***** Start Tri-training pipeline ***** ")
-        script = "python run_tritrain.py --U machine_translation/2017_de_sents.txt --u {} --mi_dir tri-models/s1_model/ --mj_dir tri-models/s2_model/ --mk_dir tri-models/s3_model/ --tcfd_threshold {} --scfd_threshold {} --r_t 0.05 --r_s 0.05".format(args.u, args.tcfd_threshold, args.scfd_threshold)
+        script = "python run_tritrain.py --U machine_translation/2017_de_sents.txt --u {} --mi_dir tri-models/s1_model/ --mj_dir tri-models/s2_model/ --mk_dir tri-models/s3_model/ --tcfd_threshold {} --scfd_threshold {} --r_t 0.05 --r_s 0.05 --eval_dir {}".format(args.u, args.tcfd_threshold, args.scfd_threshold, args.eval_dir)
         os.system(script)
 
 

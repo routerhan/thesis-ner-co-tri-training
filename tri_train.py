@@ -138,7 +138,7 @@ class TriTraining:
             t1, t2, s = (self.mj, self.mk, self.mi)
         return t1, t2 , s, e_rate
 
-    def fit(self):
+    def fit(self, eval_dir="tri-models/eval_monitor/"):
         """
         This function takes care of tri-training process.
         """
@@ -276,7 +276,7 @@ class TriTraining:
                 os.system(script)
                 # Save the eval result of each student re-trained model
                 it_prefix = "{}_{}".format(it, prefix)
-                script = "python run_ner.py --do_eval --eval_on test --extend_L_tri --eval_dir tri-models/eval_monitor/ --ext_output_dir {} --it_prefix {}".format(ext_output_dir, it_prefix)
+                script = "python run_ner.py --do_eval --eval_on test --extend_L_tri --eval_dir {} --ext_output_dir {} --it_prefix {}".format(eval_dir, ext_output_dir, it_prefix)
                 os.system(script)
             # Assign ext_model as new rotated candidates roles
             self.mi = (Ner(model_dir="{}/{}_ext_s1_model/".format(ext_model_saved_dir, it)), "{}/{}_ext_s1_model/".format(ext_model_saved_dir, it))
