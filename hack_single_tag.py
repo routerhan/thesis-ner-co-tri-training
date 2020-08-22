@@ -63,7 +63,7 @@ def main():
                         default="random-co-train/co-ext-data/ext-data-t0/1482_ext_L_A_sents.pkl",
                         type=str,
                         help="the sent dir of co-training ext data")
-    parser.add_argument("--co_sents_dir",
+    parser.add_argument("--co_labels_dir",
                         default="random-co-train/co-ext-data/ext-data-t0/1482_ext_L_A_labels.pkl",
                         type=str,
                         help="the label dir of co-training ext data")
