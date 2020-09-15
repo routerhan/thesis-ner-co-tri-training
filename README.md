@@ -1,228 +1,56 @@
 # thesis-ner-co-tri-training
-This repo is aiming to implementing the co-training and tri-training framework to compare the result of fine-grained NER task
+This repo aims to implement novel cross-lingual co-training approach and tri-training with teacher-student learning paradigm approach on fine-grained named entity recognition task in German language.
 
-# Overview
-The task is focusing on `semi-supervised learning`, therefore there are a small set of labeled data and larger set of unlabeled data in our experiemnt.
-## Dataset
+# Outline
+### 1. Dataset & Baseline models
 * Labeled corpus:
     - `Israel Corpus`, German spoken corpus.
     - `OntoNotes 5.0`, English labeled set.
-    - `Tweet`, German.
 * Unlabled corpus:
-    - `Movie subtiles`, German.
+    - `OpenSubtitles`,Movie subtiles in German.
 
-## Models
-* Self-training with BERT fine-tuned model as base classifier.
-* Co-training with BERT fine-tuned model as base classifier with cross-lingual approach.
-* Tri-training with teacher-student paradigm, BERT fine-tuned model as base classifier with cross-lingual approach.
-* Tri-training with teacher-student paradigm, BERT fine-tuned model as base classifier but using different BERT pretrained embedding model, with cross-lingual approach.
+### 2. How to run the experiemts?
+* Obtain baseline models:
+    - `ISW BERT baseline model`
+    - `OntoNotes 5.0 BERT Model`
+* Cross-lingual co-training approach:
+    - Prerequisite : machine translation setup
+    - Parameters setup
+    - Training
+    - Evaluation
+    - Further analysis
+      - Influence of Confident Selection (top n)
+      - Influence of Unlabeled Samples Size (pool value u)
+* Tri-training with teacher-student learning approach:
+    - Prerequisite : single-view spliting
+    - Parameters setup
+    - Training
+    - Evaluation
+    - Further analysis
+      - Influence of Pool Value (pool value u)
+* Comparison Evaluation
+    - Quantitive Analysis
+      - Fixed amount of unlabeled samples
+      - Fixed amount of pseudo-labeled samples
 
-# 1. ISW BERT baseline model - German
-* __BERT model : `bert-base-german-cased`__
+* Single Tag Evaluation
+    - Co-training with single tag
+    - Tri-training with single tag
 
-## Train the baseline BERT model
+# Obtain Baseline Models
+## ISW BERT baseline model - German
+### Train the model
 `python run_ner.py --data_dir data/full-isw-release.tsv --bert_model bert-base-german-cased --output_dir baseline_model/ --max_seq_length 128 --do_train`
 
-## Evaluate the model on dev or test set
+### Evaluate the model on dev or test set
 `python run_ner.py --data_dir data/full-isw-release.tsv --output_dir baseline_model/ --max_seq_length 128 --do_eval --eval_on test`
 
-## ISW BERT Performance:
-`Train/dev/test : 70/20/10`
-
-```
-- INFO - preprocessor -   ------ Preprocssing ISW German corpus ------
-- INFO - preprocessor -   Number of sentences: 16084 
-- INFO - preprocessor -   Number of tags: 62 
-- INFO - train_test_split -   ***** Train/dev/test split: 70/20/10 *****
-- INFO - train_test_split -     Num train = 11258
-- INFO - train_test_split -     Num dev = 3217
-- INFO - train_test_split -     Num test = 1609
-
-- INFO - __main__ -   ***** Running training *****
-- INFO - __main__ -     Num examples = 11258
-- INFO - __main__ -     Batch size = 32
-- INFO - __main__ -     Num steps = 1053
-
-- INFO - preprocessor -   *** Features Example ***
-- INFO - preprocessor -   textlist: Ich kannte sie nur in Wien
-- INFO - preprocessor -   labellist: O O O O O B-GPE
-- INFO - preprocessor -   tokens: Ich kannte sie nur in Wien
-```
-
-
-```
-- INFO - __main__ -   ***** Running evaluation: test *****
-
-           precision    recall  f1-score   support
-
-      LAN     0.9376    0.9592    0.9483       564
-     TIME     0.8598    0.9093    0.8839      1059
-     DATE     0.7752    0.7642    0.7697       352
-      DUR     0.6850    0.6493    0.6667       422
-      GPE     0.9653    0.9739    0.9696      1113
-      AGE     0.6614    0.5915    0.6245       142
-      PER     0.8299    0.8971    0.8622       272
-      NRP     0.9226    0.9140    0.9183       756
-  ORDINAL     0.8197    0.8264    0.8230       121
-      EVT     0.9020    0.7797    0.8364        59
- CARDINAL     0.8542    0.8039    0.8283       153
-     PROJ     1.0000    0.6667    0.8000         3
-      FAC     0.7143    0.8125    0.7602        80
-      LOC     0.7400    0.6852    0.7115        54
-     FREQ     0.7716    0.8224    0.7962       152
-     FRAC     0.4000    0.5000    0.4444         4
-     MISC     0.7714    0.6136    0.6835        44
-      ORG     0.6900    0.6832    0.6866       101
-      ART     0.4091    0.3103    0.3529        29
-     SORD     0.7763    0.7284    0.7516        81
-    TITLE     0.9032    0.9032    0.9032        31
-      MON     0.8421    0.8421    0.8421        19
-     RATE     0.0000    0.0000    0.0000         4
-  PRODUCT     0.0000    0.0000    0.0000         9
-    QUANT     0.7778    0.7000    0.7368        10
-     PERC     1.0000    0.8182    0.9000        11
-      ADD     0.0000    0.0000    0.0000         1
-      MED     0.0000    0.0000    0.0000         1
-      LAW     1.0000    1.0000    1.0000         1
-
-micro avg     0.8587    0.8631    0.8609      5648
-macro avg     0.8564    0.8631    0.8592      5648
-
-- INFO - __main__ -   ***** Save the results to baseline_model/: test_results.txt *****
-```
-
-## Basline isw-model configuration
-```
-{
-    "bert_model": "bert-base-german-cased", 
-    "do_lower": false, 
-    "train_data_dir": "data/full-isw-release.tsv", 
-    "train_batch_size": 32, 
-    "num_train_epochs": 3.0, 
-    "learning_rate": 5e-05, 
-    "adam_epsilon": 1e-08, 
-    "max_grad_norm": 1.0, 
-    "max_seq_length": 128, 
-    "output_dir": "baseline_model/", 
-    "seed": 42, 
-    "gradient_accumulation_steps": 1, 
-    "num_labels": 63, 
-    "label_map": 
-        {"1": "B-ADD", "2": "B-AGE", "3": "B-ART", "4": "B-CARDINAL", "5": "B-CREAT", 
-        "6": "B-DATE", "7": "B-DUR", "8": "B-EVT", "9": "B-FAC", "10": "B-FRAC", 
-        "11": "B-FREQ", "12": "B-GPE", "13": "B-LAN", "14": "B-LAW", "15": "B-LOC", 
-        "16": "B-MED", "17": "B-MISC", "18": "B-MON", "19": "B-NRP", "20": "B-ORDINAL", 
-        "21": "B-ORG", "22": "B-PER", "23": "B-PERC", "24": "B-PRODUCT", "25": "B-PROJ", 
-        "26": "B-QUANT", "27": "B-RATE", "28": "B-SORD", "29": "B-TIME", "30": "B-TITLE", 
-        "31": "I-ADD", "32": "I-AGE", "33": "I-ART", "34": "I-CARDINAL", "35": "I-DATE", 
-        "36": "I-DUR",": "I-FAC", "39": "I-FRAC", "40": "I-FREQ", 
-        "41": "I-GPE", "42": "I-LAN", "43": "I-LAW", "44": "I-LOC", "45": "I-MED", 
-        "46": "I-MISC", "47": "I-MON", "48": "I-NRP", "49": "I-ORDINAL", "50": "I-ORG", 
-        "51": "I-PER", "52": "I-PERC", "53": "I-PRODUCT", "54": "I-PROJ", "55": "I-QUANT", 
-        "56": "I-RATE", "57": "I-SORD", "58": "I-TIME", "59": "I-TITLE", 
-        "60": "O", "61": "[CLS]", "62": "[SEP]"}
-}
-```
-
-# 2. OntoNotes 5.0 BERT Model - English
-* __BERT model : `bert-base-uncased`__
-
-## Train the OntoNote 5.0 Eng model
-* __*Noted that `--do_lower_case` should be triggered as we are using uncased model.__ \
-
+## OntoNotes 5.0 BERT Model
+### Train the model
 `python run_ner.py --data_dir ../OntoNotes-5.0-NER-BIO/onto.train.ner --bert_model bert-base-uncased --output_dir onto_model/ --max_seq_length 128 --do_train --do_lower_case`
 
-## Evaluate the model on dev or test set
+### Evaluate the model on dev or test set
 `python run_ner.py --data_dir ../OntoNotes-5.0-NER-BIO/onto.test.ner --output_dir onto_model/ --max_seq_length 128 --do_eval --eval_on test --do_lower_case`
-
-## OntoNotes 5.0 BERT Performance
-
-* `dev : /onto.development.ner` \
-```
-***** Running evaluation: dev *****
-  Num examples = 15680
-  Batch size = 8
-- INFO - __main__ -
-             precision    recall  f1-score   support
-
-        ORG     0.8406    0.8606    0.8505      3794
-     PERSON     0.9186    0.9480    0.9331      3154
-       NORP     0.8747    0.8802    0.8774      1277
-       DATE     0.8479    0.8812    0.8642      3200
-   CARDINAL     0.8017    0.8749    0.8367      1719
-    ORDINAL     0.7609    0.8358    0.7966       335
-        GPE     0.9202    0.9113    0.9157      3630
-      MONEY     0.8916    0.9064    0.8989       844
-        LAW     0.3804    0.5385    0.4459        65
-        FAC     0.3756    0.6015    0.4624       133
-   LANGUAGE     0.6122    0.8571    0.7143        35
-    PRODUCT     0.5779    0.4159    0.4837       214
-    PERCENT     0.9064    0.9009    0.9037       656
-       TIME     0.7103    0.7812    0.7441       361
-WORK_OF_ART     0.4375    0.4505    0.4439       202
-        LOC     0.6250    0.6646    0.6442       316
-   QUANTITY     0.7778    0.7000    0.7368       190
-      EVENT     0.5205    0.4246    0.4677       179
-
-avg / total     0.8491    0.8704    0.8590     20304
-```
-* `test : /onto.test.ner`
-```
-***** Running evaluation: test *****
-  Num examples = 12217
-  Batch size = 8
-- INFO - __main__ -
-             precision    recall  f1-score   support
-
-        FAC     0.5600    0.6577    0.6049       149
-       TIME     0.5479    0.6356    0.5885       225
-        GPE     0.9133    0.9057    0.9095      2546
-        ORG     0.8084    0.8432    0.8254      2002
-       NORP     0.8777    0.9131    0.8950       990
-   QUANTITY     0.7394    0.6863    0.7119       153
-     PERSON     0.9074    0.9049    0.9061      2134
-   CARDINAL     0.7813    0.8000    0.7906      1005
-       DATE     0.7997    0.8673    0.8321      1786
-        LOC     0.6034    0.6512    0.6264       215
-      MONEY     0.8522    0.9099    0.8801       355
-    ORDINAL     0.6846    0.7971    0.7366       207
-    PERCENT     0.8571    0.8971    0.8766       408
-WORK_OF_ART     0.5087    0.5207    0.5146       169
-   LANGUAGE     0.7059    0.5455    0.6154        22
-    PRODUCT     0.6111    0.6111    0.6111        90
-      EVENT     0.5667    0.6000    0.5829        85
-        LAW     0.4333    0.5909    0.5000        44
-
-avg / total     0.8287    0.8545    0.8410     12585
-```
-
-## OntoNote 5.0 model configuration
-```
-{
-    "bert_model": "bert-base-uncased", 
-    "do_lower": true, 
-    "train_data_dir": "../OntoNotes-5.0-NER-BIO/onto.train.ner", 
-    "train_batch_size": 32, 
-    "num_train_epochs": 3.0, 
-    "learning_rate": 5e-05, 
-    "adam_epsilon": 1e-08, 
-    "max_grad_norm": 1.0, 
-    "max_seq_length": 128, 
-    "output_dir": "onto_model/", 
-    "seed": 42, 
-    "gradient_accumulation_steps": 1, 
-    "num_labels": 40, 
-    "label_map": 
-    {"1": "B-CARDINAL", "2": "B-DATE", "3": "B-EVENT", "4": "B-FAC", "5": "B-GPE", 
-    "6": "B-LANGUAGE", "7": "B-LAW", "8": "B-LOC", "9": "B-MONEY", "10": "B-NORP", 
-    "11": "B-ORDINAL", "12": "B-ORG", "13": "B-PERCENT", "14": "B-PERSON", "15": "B-PRODUCT", 
-    "16": "B-QUANTITY", "17": "B-TIME", "18": "B-WORK_OF_ART", "19": "I-CARDINAL", "20": "I-DATE", 
-    "21": "I-EVENT", "22": "I-FAC", "23": "I-GPE", "24": "I-LANGUAGE", "25": "I-LAW", 
-    "26": "I-LOC", "27": "I-MONEY", "28": "I-NORP", "29": "I-ORDINAL", "30": "I-ORG", 
-    "31": "I-PERCENT", "32": "I-PERSON", "33": "I-PRODUCT", "34": "I-QUANTITY", "35": "I-TIME", 
-    "36": "I-WORK_OF_A": "[CLS]", "39": "[SEP]"}
-}
-```
 
 # Co-Training method
 Co-training algorithm is considered as bootstrap method to boost the amount of labeled set from unlabeled set. 
@@ -243,7 +71,7 @@ python run_ner.py --data_dir ../OntoNotes-5.0-NER-BIO/onto.train.ner --bert_mode
 * Once you have the `de_sents.txt` and `en_sents.txt` as our unlabeled set, we can start out co-training process.
 
 
-## Steps
+## Train Steps
 1. Execute the co-training script to get `extended labeled set`, which will be later used to extend the original labeled set.
 * You may need to decide the value of co-training params.
 
@@ -319,6 +147,15 @@ python run_ner.py --data_dir data/full-isw-release.tsv --output_dir baseline_mod
 ```
 * the ext_model will be saved in the directory `--ext_output_dir`
 
+## Further analysis
+Here we also experiemnted how different initialization of our proposed approach affects the model performance, simply trigger script is described as follows:
+1. Influence of Confident Selection (top n):
+
+`pyhton hack_co.py --{tune_top_n} --do_retrain`
+
+2. Influence of Unlabeled Samples Size (pool value u)
+
+`pyhton hack_co.py --{tune_pool_value} --do_retrain`
 
 # Tri-Training method
 Tri-training is also a semi-supervised training method, it subsamples the labeled set and learn three initial classifiers.
@@ -334,10 +171,6 @@ python run_tritrain.py --save_subsample --sample_dir sub_data/ --r 0.7 --dataset
 # --output_dir : the subset model dir, --do_subtrain: enable train subset, --subtrain_dir: the dir where subset data is stored
 
 python run_ner.py --output_dir tri-models/s1_model/ --max_seq_length 128 --do_train --do_subtrain --subtrain_dir sub_data/train-isw-s1.pkl
-
-python run_ner.py --output_dir tri-models/s2_model/ --max_seq_length 128 --do_train --do_subtrain --subtrain_dir sub_data/train-isw-s2.pkl
-
-python run_ner.py --output_dir tri-models/s3_model/ --max_seq_length 128 --do_train --do_subtrain --subtrain_dir sub_data/train-isw-s3.pkl
 ```
 
 One-line trigger for whole Prerequisite setup by enabling arg: `--do_prerequisite`, which will give you three initial classifiers, i.e. s1, s2 and s3
@@ -477,6 +310,52 @@ python run_ner.py --max_seq_length 128 --do_train --do_subtrain --extend_L_tri -
 python run_ner.py --do_eval --eval_on test --extend_L_tri --eval_dir tri-models/eval_monitor/ --ext_output_dir tri-ext-models/{it}_ext_{s1}_model/ --it_prefix {1}_{s3}
 ```
 
+# Comparison Evaluation
+Here we conducted the experiments with same setting to see the difference between two proposed methods with 5 trials.
+
+| Environment Variable| Default| Description|
+|---------------------|--------|------------|
+| `get_random_baselines`  | store_true | Whether to train trials baseline model trained on random selected train set|
+| `get_random_co_train_result_fix_u` | store_true  | Whether to train trials co-models with fix amount of unlabeled samples|
+| `get_random_tri_train_result_fix_u` | store_true  | Whether to train trials tri-models with fix amount of unlabeled samples|
+| `get_random_co_train_result_fix_n` | store_true  | Whether to train trials co-models with fix amount of selected samples|
+| `get_random_tri_train_result_fix_n` | store_true  | Whether to train trials tri-models with fix amount of selected samples|
+| `n_trials` | int  | the number of trials for experiemt|
+| `selected_n` | int  | the number of n for experiemt|
+
+## Fixed amount of unlabeled samples
+* Co-training:
+
+`python hack_exp.py --get_random_co_train_result_fix_u --n_trials 5`
+* Tri-training:
+
+`python hack_exp.py --get_random_tri_train_result_fix_u --n_trials 5`
+## Fixed amount of pseudo-labeled samples
+* Co-training:
+
+`python hack_exp.py --get_random_co_train_result_fix_n --n_trials 5 --n 100`
+* Tri-training:
+
+`python hack_exp.py --get_random_tri_train_result_fix_n --n_trials 5 --n 100`
+
+
+# Single Tag Evaluation
+Here we limited the newly added samples with selected tag, which means only the samples with certain tags will be added into original train data. The example scripts are as follows:
+
+| Environment Variable| Default| Description|
+|---------------------|--------|------------|
+| `do_single_co`  | store_true | Whether to train single-tag baseline model with co-training ext|
+| `do_single_tri` | store_true  | Whether to train single-tag baseline model with tri-training ext|
+| `co_sents_dir` | random-co-train/co-ext-data/ext-data-t0/1482_ext_L_A_sents.pkl  | the sent dir of co-training ext data|
+| `co_labels_dir` | random-co-train/co-ext-data/ext-data-t0/1482_ext_L_A_labels.pkl  | the label dir of co-training ext data|
+| `tri_all_dir` | sub_data/ext-train-isw-s3.pkl | the ext_all dir of tri-training approach|
+| `fix_len` | 50  | the number of single tag be introduced|
+| `tag` | `PER`  | the tag for single-tag retraining|
+
+## Co-training with single tag
+`python --do_single_co --co_sents_dir "random-co-train/co-ext-data/ext-data-t0/1482_ext_L_A_sents.pkl" --co_labels_dir random-co-train/co-ext-data/ext-data-t0/1482_ext_L_A_labels.pkl --fix_len 50 --tag PER`
+## Tri-training with single tag
+`python --do_single_tri --tri_all_dir sub_data/ext-train-isw-s3.pkl --fix_len 50 --tag PER`
 
 # Simple API
 JUST for giving you an idea on the model prediction and further investigation. 
